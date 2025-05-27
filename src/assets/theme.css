@@ -1,0 +1,102 @@
+/* 全局暗色主题样式 */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #1f2937;
+    --text-secondary-color: #4b5563;
+    --border-color: #e5e7eb;
+    --card-bg-color: #ffffff;
+    --hover-bg-color: #f3f4f6;
+}
+
+html.dark,
+body.dark {
+    color-scheme: dark;
+    --bg-color: #1a1a1a;
+    --text-color: #e5e7eb;
+    --text-secondary-color: #9ca3af;
+    --border-color: #374151;
+    --card-bg-color: #1f2937;
+    --hover-bg-color: #374151;
+}
+
+/* 基本样式 */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 文本和边框 */
+.dark-text {
+    color: var(--text-color) !important;
+}
+
+.dark-text-secondary {
+    color: var(--text-secondary-color) !important;
+}
+
+.dark-border {
+    border-color: var(--border-color) !important;
+}
+
+.dark-bg {
+    background-color: var(--bg-color) !important;
+}
+
+.dark-card-bg {
+    background-color: var(--card-bg-color) !important;
+}
+
+.dark-hover-bg:hover {
+    background-color: var(--hover-bg-color) !important;
+}
+
+/* 导航链接 */
+.router-link-active {
+    color: #3b82f6 !important;
+    font-weight: 600;
+}
+
+.dark .router-link-active {
+    color: #60a5fa !important;
+}
+
+/* Naive UI 相关样式修复 */
+.dark .n-data-table {
+    --n-th-color: rgba(31, 41, 55, 0.8) !important;
+    --n-td-color: #1f2937 !important;
+    --n-td-color-hover: rgba(55, 65, 81, 0.5) !important;
+    --n-td-color-striped: rgba(31, 41, 55, 0.3) !important;
+    --n-border-color: #374151 !important;
+    --n-th-text-color: #e5e7eb !important;
+    --n-td-text-color: #d1d5db !important;
+}
+
+.dark .n-button:not(.n-button--primary-type):not(.n-button--info-type):not(.n-button--success-type):not(.n-button--warning-type):not(.n-button--error-type) {
+    --n-text-color: #e5e7eb !important;
+    --n-border: 1px solid #4b5563 !important;
+}
+
+.dark .n-input {
+    --n-border: 1px solid #4b5563 !important;
+    --n-border-hover: 1px solid #6b7280 !important;
+}
+
+.dark .n-select {
+    --n-border: 1px solid #4b5563 !important;
+    --n-border-hover: 1px solid #6b7280 !important;
+}
+
+.dark .n-card {
+    background-color: #1f2937 !important;
+}
+
+/* 固定背景颜色在全屏模式 */
+html.dark {
+    background-color: #1a1a1a;
+}
+
+/* 修复高对比度文本问题 */
+.dark .low-contrast-text {
+    opacity: 0.8;
+}
