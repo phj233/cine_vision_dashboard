@@ -72,8 +72,8 @@
           <div v-if="actorData.collaborations && actorData.collaborations.length > 0" style="height: 500px;">
             <v-chart style="width: 100%; height: 100%;" :option="networkChartOption" :autoresize="true"></v-chart>
           </div>
-          <n-empty 
-            v-else 
+          <n-empty
+            v-else
             description="未找到合作关系数据"
             style="height: 300px; display: flex; flex-direction: column; justify-content: center;" />
         </n-card>
@@ -93,8 +93,8 @@
                   </template>
                   <template #header-extra>{{ movie.release_date }}</template>
                   <n-space>
-                    <n-tag 
-                      v-for="(actor, idx) in displayActors(movie.cast)" 
+                    <n-tag
+                      v-for="(actor, idx) in displayActors(movie.cast)"
                       :key="idx"
                       type="info"
                       size="small"
@@ -106,8 +106,8 @@
               </n-gi>
             </n-grid>
           </div>
-          <n-empty 
-            v-else 
+          <n-empty
+            v-else
             description="未找到电影数据"
             style="height: 200px; display: flex; flex-direction: column; justify-content: center;" />
         </n-card>
@@ -130,8 +130,8 @@
               striped
             />
           </div>
-          <n-empty 
-            v-else 
+          <n-empty
+            v-else
             description="未找到合作数据"
             style="height: 200px; display: flex; flex-direction: column; justify-content: center;" />
         </n-card>
@@ -140,8 +140,8 @@
       <!-- 无数据提示 -->
       <n-card v-else-if="searched && !loading">
         <div style="height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-          <n-empty 
-            description="未找到数据" 
+          <n-empty
+            description="未找到数据"
             style="margin-bottom: 1rem;">
             <template #extra>
               <div>未找到"{{ lastSearchedActor }}"的数据</div>
@@ -168,11 +168,13 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from 'vue';
 import {visualizationApi} from '@/lib/api';
+import * as echarts from 'echarts/core';
 import {use} from 'echarts/core';
 import {CanvasRenderer} from 'echarts/renderers';
 import {GraphChart} from 'echarts/charts';
 import {GridComponent, LegendComponent, TitleComponent, TooltipComponent,} from 'echarts/components';
 import VChart from 'vue-echarts';
+import type {ECBasicOption} from 'echarts/types/dist/shared';
 import {
   NButton,
   NCard,
@@ -189,6 +191,25 @@ import {
   NTag
 } from 'naive-ui';
 
+// 定义API返回的数据结构
+interface Movie {
+  id: string;
+  title: string;
+  release_date: string;
+  cast: string[];
+}
+
+interface Collaboration {
+  co_actor: string;
+  collaboration_count: number;
+}
+
+interface ActorNetworkData {
+  actor: string;
+  collaborations: Collaboration[];
+  movies: Movie[];
+}
+
 // 注册 ECharts 组件
 use([
   CanvasRenderer,
@@ -204,7 +225,7 @@ const loading = ref(false);
 const actorName = ref('');
 const minCollaborations = ref(2);
 const limit = ref(20);
-const actorData = ref<any>(null);
+const actorData = ref<ActorNetworkData | null>(null);
 const searched = ref(false);
 const lastSearchedActor = ref('');
 
@@ -227,7 +248,7 @@ const searchActor = async () => {
   lastSearchedActor.value = actorName.value;
 
   try {
-    const result = await visualizationApi.getActorCollaborations(
+    const result = await visualizationApi.getActorNetwork(
       actorName.value,
       minCollaborations.value,
       limit.value
@@ -247,17 +268,33 @@ const searchActor = async () => {
 };
 
 // 处理显示的演员列表，限制数量
-const displayActors = (castString: string) => {
+const displayActors = (castString: string | string[]) => {
   if (!castString) return [];
-  const actors = castString.split(',').map(a => a.trim());
+
+  let actors: string[] = [];
+  if (typeof castString === 'string') {
+    actors = castString.split(',').map(a => a.trim());
+  } else if (Array.isArray(castString)) {
+    actors = castString;
+  }
+
   // 最多显示5个演员
   return actors.slice(0, 5);
 };
 
 // 计算合作关系网络图配置
-const networkChartOption = computed(() => {
-  if (!actorData.value || !actorData.value.collaborations) {
-    return {};
+const networkChartOption = computed<ECBasicOption>(() => {
+  if (!actorData.value || !actorData.value.collaborations || actorData.value.collaborations.length === 0) {
+    return {
+      title: {
+        text: '无合作数据',
+        left: 'center',
+        textStyle: {
+          fontSize: 18,
+          fontWeight: 'bold'
+        }
+      }
+    };
   }
 
   const { actor, collaborations } = actorData.value;
@@ -267,62 +304,113 @@ const networkChartOption = computed(() => {
     {
       id: actor,
       name: actor,
-      symbolSize: 50,
+      symbolSize: 60,
       itemStyle: {
         color: '#f78fb3',
+        borderColor: '#f8a5c2',
+        borderWidth: 4,
+        shadowBlur: 10,
+        shadowColor: 'rgba(247, 143, 179, 0.5)'
       },
       label: {
-        show: true
+        show: true,
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#333',
+        position: 'right',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        padding: [4, 8],
+        borderRadius: 4
       }
     }
   ];
 
-  collaborations.forEach((collab: any) => {
-    const size = Math.max(20, Math.min(40, collab.collaboration_count * 10));
+  collaborations.forEach((collab: Collaboration) => {
+    const size = Math.max(25, Math.min(45, collab.collaboration_count * 10));
     nodes.push({
       id: collab.co_actor,
       name: collab.co_actor,
       symbolSize: size,
       itemStyle: {
         color: '#18dcff',
+        borderColor: '#32ccfe',
+        borderWidth: 2,
+        shadowBlur: 5,
+        shadowColor: 'rgba(24, 220, 255, 0.3)'
       },
       label: {
-        show: collab.collaboration_count > Math.max(2, minCollaborations.value)
+        show: collab.collaboration_count > Math.max(2, minCollaborations.value),
+        fontSize: 12,
+        fontWeight: 'normal',
+        color: '#333',
+        position: 'right',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        padding: [3, 6],
+        borderRadius: 3
       }
     });
   });
 
   // 准备边数据
-  const links = collaborations.map((collab: any) => ({
+  const links = collaborations.map((collab: Collaboration) => ({
     source: actor,
     target: collab.co_actor,
+    value: collab.collaboration_count,
+    symbolSize: [5, 10],
     lineStyle: {
-      width: Math.log(collab.collaboration_count) * 2 + 1,
-      color: '#808e9b'
+      width: Math.log(collab.collaboration_count) * 2 + 1.5,
+      color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        { offset: 0, color: '#f78fb3' },
+        { offset: 1, color: '#18dcff' }
+      ]),
+      opacity: 0.7,
+      curveness: 0.3,
+      shadowBlur: 3,
+      shadowColor: 'rgba(0, 0, 0, 0.2)'
     },
     label: {
       show: collab.collaboration_count > 3,
-      formatter: `${collab.collaboration_count}部`
+      formatter: `${collab.collaboration_count}部`,
+      fontSize: 12,
+      color: '#555',
+      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+      padding: [2, 5],
+      borderRadius: 3
     }
   }));
 
   return {
     title: {
       text: `${actor}的合作关系网络`,
-      left: 'center'
+      left: 'center',
+      textStyle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333'
+      },
+      subtextStyle: {
+        color: '#666'
+      }
     },
     tooltip: {
+      trigger: 'item',
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      borderColor: '#eee',
+      borderWidth: 1,
+      textStyle: {
+        color: '#333'
+      },
       formatter: function(params: any) {
         if (params.dataType === 'node') {
-          return params.data.name;
+          return `<div style="font-weight:bold;margin-bottom:5px;">${params.data.name}</div>`;
         }
-        return `${params.data.source} 与 ${params.data.target} 合作 ${
-          collaborations.find((c: any) => c.co_actor === params.data.target).collaboration_count
-        } 部电影`;
+        const collabCount = collaborations.find((c: Collaboration) => c.co_actor === params.data.target)?.collaboration_count || 0;
+        return `<div style="font-weight:bold;margin-bottom:5px;">${params.data.source} 与 ${params.data.target}</div>
+                <div>合作 <span style="color:#f78fb3;font-weight:bold;">${collabCount}</span> 部电影</div>`;
       }
     },
     animationDuration: 1500,
-    animationEasingUpdate: 'quinticInOut',
+    animationEasingUpdate: 'quinticInOut' as const,
     series: [
       {
         name: '演员合作关系',
@@ -331,6 +419,9 @@ const networkChartOption = computed(() => {
         data: nodes,
         links: links,
         roam: true,
+        zoom: 1.2,
+        edgeSymbol: ['none', 'arrow'],
+        edgeSymbolSize: [0, 7],
         label: {
           position: 'right'
         },
@@ -342,13 +433,23 @@ const networkChartOption = computed(() => {
           focus: 'adjacency',
           lineStyle: {
             width: 10
+          },
+          scale: true,
+          scaleSize: 5,
+          itemStyle: {
+            shadowBlur: 10,
+            shadowColor: 'rgba(0, 0, 0, 0.3)'
           }
         },
         force: {
-          repulsion: 100,
+          repulsion: 200,
           gravity: 0.1,
-          edgeLength: 100
-        }
+          edgeLength: [80, 150],
+          friction: 0.2,
+          layoutAnimation: true
+        },
+        draggable: true,
+        animation: true
       }
     ]
   };
