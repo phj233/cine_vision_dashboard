@@ -10,10 +10,11 @@
 - ECharts
 - Axios
 - Vue Router
+- Tailwind CSS
 
 ### 作品主题
 
-本项目是一个IMDB影视数据可视化项目，旨在通过交互式图表和可视化展示电影行业的相关数据。项目使用了Vue 3、TypeScript和Vite等现代前端技术。
+本项目是一个IMDB影视数据可视化项目，旨在通过交互式图表和可视化展示电影行业的相关数据。项目使用了Vue 3、TypeScript和Vite等现代前端技术。与传统的电影数据分析不同，本项目采用了3D可视化技术和响应式设计，提供了更加直观和交互式的体验。
 
 ### 目标用户
 
@@ -55,6 +56,7 @@
    - 饼图：展示电影评分分布
    - 地图：显示不同地区的电影产量
    - 表格：展示详细的电影数据
+   - 3D卡片：提供交互式的数据显示
 
 ### 项目功能模块
 
@@ -63,6 +65,7 @@
    - **评分分布**：使用饼图展示不同评分区间内的电影数量分布
    - **电影类型分布**：使用柱状图展示不同类型电影的数量分布
    - **地图可视化**：使用地图组件展示不同地区的电影产量
+   - **3D统计卡片**：使用3D卡片展示关键统计数据，提供交互式体验
 
 2. 数据表格
    - 展示详细的电影数据列表，包括电影海报、片名、类型、上映日期、评分、时长、制片国家、票房等信息
@@ -74,3 +77,58 @@
    - 支持数据缩放查看
    - 支持提示信息展示
    - 支持响应式布局
+   - 支持深色/浅色主题切换
+
+4. 其他特性
+   - 使用Tailwind CSS实现快速样式开发
+   - 使用Naive UI组件库提升开发效率
+   - 使用Vue 3 Composition API组织代码
+   - 使用Pinia进行状态管理
+   - 使用Vue Router实现路由功能
+   - 使用ECharts实现数据可视化
+   - 使用Axios进行API调用
+   - 使用TypeScript增强类型安全性
+
+### 项目结构
+
+```
+├── lib
+│   ├── naive-ui-theme-overrides.json - Naive UI主题覆盖配置
+│   └── util.ts - 工具函数
+├── src
+│   ├── assets - 静态资源
+│   │   └── theme.css - 主题样式
+│   ├── components - 组件库
+│   │   ├── ui - 可重用UI组件
+│   │   │   ├── card-3d - 3D卡片组件
+│   │   │   └── input - 输入组件
+│   │   ├── BudgetRevenueChart.vue - 预算与票房对比图表
+│   │   ├── ChartSection.vue - 图表区域组件
+│   │   ├── DirectorAnalysisChart.vue - 导演分析图表
+│   │   ├── Header.vue - 页面头部组件
+│   │   ├── LanguageDistributionChart.vue - 语言分布图表
+│   │   ├── MiniCharts.vue - 小型图表组件
+│   │   ├── MovieTable.vue - 电影数据表格
+│   │   ├── RevenueChart.vue - 票房趋势图表
+│   │   ├── StatCards.vue - 统计卡片组件
+│   │   └── WorldMapChart.vue - 世界地图可视化组件
+│   ├── composables - 可组合函数
+│   │   ├── useMouseState.ts - 鼠标状态管理
+│   │   └── useTheme.ts - 主题管理
+│   ├── lib - 项目特定库
+│   │   ├── api.ts - API请求封装
+│   │   ├── config.ts - 配置信息
+│   │   ├── theme.ts - 主题配置
+│   │   └── utils.ts - 工具函数
+│   ├── router - 路由配置
+│   │   └── index.ts - 路由定义
+│   ├── utils - 实用工具
+│   │   └── notification.ts - 通知工具
+│   ├── view - 页面视图
+│   │   ├── home - 首页视图
+│   │   ├── import - 数据导入视图
+│   │   └── visualization - 可视化视图
+│   ├── App.vue - 根组件
+│   ├── main.ts - 入口文件
+│   ├── style.css - 主样式表
+│   └── vite.config.ts - Vite配置
