@@ -3,7 +3,7 @@
     :style="headerStyle">
     <div class="container mx-auto px-6 py-3">
       <n-space justify="space-between" align="center" :wrap="isSmallScreen">
-        <h1 class="text-2xl font-bold mb-0">电影数据可视化平台</h1>
+        <h1 class="text-2xl font-bold mb-0">Cine Vision数据可视化平台</h1>
 
         <!-- 导航链接 -->
         <n-space justify="center" align="center" class="my-2 md:my-0" :wrap="true" :size="16">
