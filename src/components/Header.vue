@@ -1,25 +1,23 @@
 <template>
-  <header :class="[
-    'fixed top-0 left-0 right-0 z-50 backdrop-blur-md shadow-sm transition-all duration-300',
-    props.darkMode ? 'bg-gray-900/80 text-white' : 'bg-white/80 text-gray-800'
-  ]">
-    <div class="container mx-auto px-6 py-4">
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-        <h1 class="text-2xl font-bold mb-4 md:mb-0">电影数据可视化平台</h1>
+  <n-layout-header bordered class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition-all duration-300"
+    :style="headerStyle">
+    <div class="container mx-auto px-6 py-3">
+      <n-space justify="space-between" align="center" :wrap="isSmallScreen">
+        <h1 class="text-2xl font-bold mb-0">电影数据可视化平台</h1>
 
         <!-- 导航链接 -->
-        <nav class="flex flex-wrap gap-4 mb-3 md:mb-0">
-          <router-link :to="{ name: 'home' }" :class="linkClass">首页</router-link>
-          <router-link :to="{ name: 'visualization' }" :class="linkClass">数据可视化</router-link>
-          <router-link :to="{ name: 'advancedVisualization' }" :class="linkClass">高级分析</router-link>
-          <router-link :to="{ name: 'actorNetwork' }" :class="linkClass">演员网络</router-link>
-          <router-link :to="{ name: 'import' }" :class="linkClass">数据导入</router-link>
-          <router-link :to="{ name: 'about' }" :class="linkClass">关于</router-link>
-        </nav>
+        <n-space justify="center" align="center" class="my-2 md:my-0" :wrap="true" :size="16">
+          <n-button text tag="div" :class="linkClass" @click="navigateTo('home')">首页</n-button>
+          <n-button text tag="div" :class="linkClass" @click="navigateTo('visualization')">数据可视化</n-button>
+          <n-button text tag="div" :class="linkClass" @click="navigateTo('advancedVisualization')">高级分析</n-button>
+          <n-button text tag="div" :class="linkClass" @click="navigateTo('actorNetwork')">演员网络</n-button>
+          <n-button text tag="div" :class="linkClass" @click="navigateTo('import')">数据导入</n-button>
+          <n-button text tag="div" :class="linkClass" @click="navigateTo('about')">关于</n-button>
+        </n-space>
 
         <!-- 日期、主题切换和刷新按钮 -->
-        <div class="flex items-center gap-4">
-          <span :class="props.darkMode ? 'text-gray-300' : 'text-gray-600'">{{ currentDate }}</span>
+        <n-space align="center" :size="12">
+          <span>{{ currentDate }}</span>
 
           <!-- 主题切换按钮 -->
           <n-button circle @click="toggleTheme">
@@ -34,18 +32,19 @@
             </template>
             刷新数据
           </n-button>
-        </div>
-      </div>
+        </n-space>
+      </n-space>
     </div>
-  </header>
+  </n-layout-header>
 
   <!-- 占位空间，防止内容被固定标题遮挡 -->
-  <div class="header-placeholder h-24 md:h-20"></div>
+  <div class="h-20 md:h-16"></div>
 </template>
 
 <script setup lang="ts">
 import {computed, onMounted, ref} from 'vue';
-import {NButton} from 'naive-ui';
+import {useRouter} from 'vue-router';
+import {NButton, NLayoutHeader, NSpace} from 'naive-ui';
 import {Icon} from '@iconify/vue';
 
 // 接收父组件传递的属性
@@ -55,6 +54,24 @@ const props = defineProps<{
 
 // 定义事件
 const emit = defineEmits(['toggle-theme']);
+
+const router = useRouter();
+
+// 判断屏幕大小
+const isSmallScreen = ref(window.innerWidth < 768);
+
+// 设置header样式
+const headerStyle = computed(() => ({
+  backgroundColor: props.darkMode ? 'rgba(24, 24, 28, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+  color: props.darkMode ? 'white' : 'inherit',
+  backdropFilter: 'blur(8px)',
+  WebkitBackdropFilter: 'blur(8px)'
+}));
+
+// 路由导航
+const navigateTo = (name: string) => {
+  router.push({ name });
+};
 
 // 切换主题
 const toggleTheme = () => {
@@ -69,9 +86,7 @@ const refreshData = () => {
 
 // 导航链接样式
 const linkClass = computed(() => ({
-  'hover:text-blue-600 transition-colors': true,
-  'text-gray-300': props.darkMode,
-  'text-gray-600': !props.darkMode,
+  'hover:text-blue-500 transition-colors': true,
 }));
 
 // 当前日期
@@ -88,37 +103,26 @@ const formatDate = () => {
   currentDate.value = `${year}年${month}月${day}日 ${weekday}`;
 };
 
+// 窗口大小变化处理
+const handleResize = () => {
+  isSmallScreen.value = window.innerWidth < 768;
+};
+
 onMounted(() => {
   formatDate();
   // 每分钟更新一次日期
   setInterval(formatDate, 60000);
 
-  // 监听滚动事件，添加阴影效果
-  const header = document.querySelector('header');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 10) {
-      header?.classList.add('shadow-md');
-      header?.classList.remove('shadow-sm');
-    } else {
-      header?.classList.remove('shadow-md');
-      header?.classList.add('shadow-sm');
-    }
-  });
+  // 监听窗口大小变化
+  window.addEventListener('resize', handleResize);
 });
 </script>
 
 <style scoped>
-.router-link-active {
-  color: #3b82f6 !important;
-  font-weight: 600;
-}
 
 .backdrop-blur-md {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-.shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
 </style>

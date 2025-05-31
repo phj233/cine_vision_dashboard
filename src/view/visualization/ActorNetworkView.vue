@@ -1,144 +1,168 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <n-card>
     <main class="container mx-auto px-6 py-8">
       <h1 class="text-2xl font-bold mb-6">演员合作网络分析</h1>
 
       <!-- 搜索栏 -->
-      <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
-        <div class="flex flex-wrap gap-4">
-          <div class="flex-grow">
-            <label class="block text-sm font-medium text-gray-700 mb-1">演员名称</label>
-            <input
-              v-model="actorName"
-              placeholder="输入演员姓名，例如：Tom Hanks"
-              class="w-full border border-gray-300 rounded-md p-2" />
-          </div>
+      <n-card style="margin-bottom: 1.5rem;" embedded>
+        <n-form>
+          <n-grid :cols="24" :x-gap="12" :y-gap="12">
+            <n-gi :span="12">
+              <n-form-item label="演员名称">
+                <n-input
+                  v-model:value="actorName"
+                  placeholder="输入演员姓名，例如：Tom Hanks"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div class="w-32">
-            <label class="block text-sm font-medium text-gray-700 mb-1">最小合作次数</label>
-            <select
-              v-model="minCollaborations"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option :value="2">2</option>
-              <option :value="3">3</option>
-              <option :value="1">1</option>
-            </select>
-          </div>
+            <n-gi :span="4">
+              <n-form-item label="最小合作次数">
+                <n-select
+                  v-model:value="minCollaborations"
+                  :options="[
+                    { label: '2', value: 2 },
+                    { label: '3', value: 3 },
+                    { label: '1', value: 1 }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div class="w-32">
-            <label class="block text-sm font-medium text-gray-700 mb-1">显示演员数量</label>
-            <select
-              v-model="limit"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option :value="20">20</option>
-              <option :value="10">10</option>
-              <option :value="30">30</option>
-            </select>
-          </div>
+            <n-gi :span="4">
+              <n-form-item label="显示演员数量">
+                <n-select
+                  v-model:value="limit"
+                  :options="[
+                    { label: '20', value: 20 },
+                    { label: '10', value: 10 },
+                    { label: '30', value: 30 }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div class="flex items-end">
-            <button
-              @click="searchActor"
-              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-              查找
-            </button>
-          </div>
-        </div>
-      </div>
+            <n-gi :span="4" style="display: flex; align-items: flex-end;">
+              <n-form-item>
+                <n-button
+                  @click="searchActor"
+                  type="primary"
+                  style="width: 100%;">
+                  查找
+                </n-button>
+              </n-form-item>
+            </n-gi>
+          </n-grid>
+        </n-form>
+      </n-card>
 
       <!-- 加载中提示 -->
-      <div v-if="loading" class="flex justify-center items-center h-80">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 300px;">
+        <n-spin size="large" />
       </div>
 
       <!-- 主要内容区域 -->
-      <div v-else-if="actorData && actorData.actor" class="flex flex-col gap-6">
+      <div v-else-if="actorData && actorData.actor" style="display: flex; flex-direction: column; gap: 1.5rem;">
         <!-- 合作关系网络图 -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-semibold mb-4">{{ actorData.actor }}的合作关系网络</h2>
+        <n-card>
+          <template #header>
+            <div style="font-size: 1.25rem; font-weight: 600;">{{ actorData.actor }}的合作关系网络</div>
+          </template>
 
-          <div v-if="actorData.collaborations && actorData.collaborations.length > 0" class="h-[500px]">
-            <v-chart class="w-full h-full" :option="networkChartOption" autoresize />
+          <div v-if="actorData.collaborations && actorData.collaborations.length > 0" style="height: 500px;">
+            <v-chart style="width: 100%; height: 100%;" :option="networkChartOption" :autoresize="true"></v-chart>
           </div>
-          <div v-else class="flex justify-center items-center h-80">
-            <p class="text-gray-500">未找到合作关系数据</p>
-          </div>
-        </div>
+          <n-empty 
+            v-else 
+            description="未找到合作关系数据"
+            style="height: 300px; display: flex; flex-direction: column; justify-content: center;" />
+        </n-card>
 
         <!-- 电影列表 -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-semibold mb-4">{{ actorData.actor }}参演的电影</h2>
+        <n-card>
+          <template #header>
+            <div style="font-size: 1.25rem; font-weight: 600;">{{ actorData.actor }}参演的电影</div>
+          </template>
 
           <div v-if="actorData.movies && actorData.movies.length > 0">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div
-                v-for="movie in actorData.movies"
-                :key="movie.id"
-                class="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div class="p-4">
-                  <h3 class="font-bold text-lg mb-1">{{ movie.title }}</h3>
-                  <p class="text-gray-500 text-sm mb-2">{{ movie.release_date }}</p>
-                  <div class="flex flex-wrap gap-1 mt-2">
-                    <div v-for="(actor, idx) in displayActors(movie.cast)" :key="idx"
-                      class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+            <n-grid :cols="3" :x-gap="12" :y-gap="12" responsive="screen">
+              <n-gi v-for="movie in actorData.movies" :key="movie.id">
+                <n-card embedded>
+                  <template #header>
+                    <div style="font-weight: bold;">{{ movie.title }}</div>
+                  </template>
+                  <template #header-extra>{{ movie.release_date }}</template>
+                  <n-space>
+                    <n-tag 
+                      v-for="(actor, idx) in displayActors(movie.cast)" 
+                      :key="idx"
+                      type="info"
+                      size="small"
+                    >
                       {{ actor }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                    </n-tag>
+                  </n-space>
+                </n-card>
+              </n-gi>
+            </n-grid>
           </div>
-          <div v-else class="flex justify-center items-center h-40">
-            <p class="text-gray-500">未找到电影数据</p>
-          </div>
-        </div>
+          <n-empty 
+            v-else 
+            description="未找到电影数据"
+            style="height: 200px; display: flex; flex-direction: column; justify-content: center;" />
+        </n-card>
 
         <!-- 合作演员表格 -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-          <h2 class="text-xl font-semibold mb-4">合作演员统计</h2>
+        <n-card>
+          <template #header>
+            <div style="font-size: 1.25rem; font-weight: 600;">合作演员统计</div>
+          </template>
 
           <div v-if="actorData.collaborations && actorData.collaborations.length > 0">
-            <table class="w-full border-collapse">
-              <thead>
-                <tr class="bg-gray-100">
-                  <th class="p-2 text-left">演员</th>
-                  <th class="p-2 text-right">合作电影数</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(collab, index) in actorData.collaborations"
-                  :key="index"
-                  class="border-b hover:bg-gray-50">
-                  <td class="p-2">{{ collab.co_actor }}</td>
-                  <td class="p-2 text-right">{{ collab.collaboration_count }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <n-data-table
+              :columns="[
+                { title: '演员', key: 'co_actor' },
+                { title: '合作电影数', key: 'collaboration_count', align: 'right' }
+              ]"
+              :data="actorData.collaborations"
+              :bordered="false"
+              :pagination="{ pageSize: 10 }"
+              striped
+            />
           </div>
-          <div v-else class="flex justify-center items-center h-40">
-            <p class="text-gray-500">未找到合作数据</p>
-          </div>
-        </div>
+          <n-empty 
+            v-else 
+            description="未找到合作数据"
+            style="height: 200px; display: flex; flex-direction: column; justify-content: center;" />
+        </n-card>
       </div>
 
       <!-- 无数据提示 -->
-      <div v-else-if="searched && !loading" class="flex justify-center items-center h-80 bg-white rounded-lg shadow-sm">
-        <div class="text-center">
-          <p class="text-gray-500 mb-4">未找到"{{ lastSearchedActor }}"的数据</p>
-          <p class="text-gray-400 text-sm">请尝试搜索其他演员，例如：Tom Hanks, Brad Pitt, Leonardo DiCaprio</p>
+      <n-card v-else-if="searched && !loading">
+        <div style="height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+          <n-empty 
+            description="未找到数据" 
+            style="margin-bottom: 1rem;">
+            <template #extra>
+              <div>未找到"{{ lastSearchedActor }}"的数据</div>
+              <div style="font-size: 0.875rem; color: #9e9e9e; margin-top: 0.5rem;">请尝试搜索其他演员，例如：Tom Hanks, Brad Pitt, Leonardo DiCaprio</div>
+            </template>
+          </n-empty>
         </div>
-      </div>
+      </n-card>
 
       <!-- 初始提示 -->
-      <div v-else class="flex justify-center items-center h-80 bg-white rounded-lg shadow-sm">
-        <div class="text-center">
-          <p class="text-gray-500 mb-4">请在上方输入演员姓名进行搜索</p>
-          <p class="text-gray-400 text-sm">例如：Tom Hanks, Brad Pitt, Leonardo DiCaprio</p>
+      <n-card v-else>
+        <div style="height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+          <n-empty description="请在上方输入演员姓名进行搜索">
+            <template #extra>
+              <div style="font-size: 0.875rem; color: #9e9e9e; margin-top: 0.5rem;">例如：Tom Hanks, Brad Pitt, Leonardo DiCaprio</div>
+            </template>
+          </n-empty>
         </div>
-      </div>
+      </n-card>
     </main>
-  </div>
+  </n-card>
 </template>
 
 <script setup lang="ts">
@@ -149,6 +173,21 @@ import {CanvasRenderer} from 'echarts/renderers';
 import {GraphChart} from 'echarts/charts';
 import {GridComponent, LegendComponent, TitleComponent, TooltipComponent,} from 'echarts/components';
 import VChart from 'vue-echarts';
+import {
+  NButton,
+  NCard,
+  NDataTable,
+  NEmpty,
+  NForm,
+  NFormItem,
+  NGi,
+  NGrid,
+  NInput,
+  NSelect,
+  NSpace,
+  NSpin,
+  NTag
+} from 'naive-ui';
 
 // 注册 ECharts 组件
 use([

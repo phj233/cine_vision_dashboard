@@ -5,7 +5,7 @@
       <n-gi :span="1">
         <n-statistic label="预算-票房对比">
           <div class="h-50">
-            <v-chart class="w-full h-full" :option="budgetRevenueChartOption" autoresize />
+            <v-chart class="w-full h-full" :option="budgetRevenueChartOption" :autoresize="true"></v-chart>
           </div>
         </n-statistic>
       </n-gi>
@@ -14,7 +14,7 @@
       <n-gi :span="1">
         <n-statistic label="电影时长分布">
           <div class="h-50">
-            <v-chart class="w-full h-full" :option="runtimeChartOption" autoresize />
+            <v-chart class="w-full h-full" :option="runtimeChartOption" :autoresize="true"></v-chart>
           </div>
         </n-statistic>
       </n-gi>
@@ -27,21 +27,31 @@ import {computed, onMounted, ref} from 'vue';
 import {NCard, NGi, NGrid, NStatistic} from 'naive-ui';
 import {use} from 'echarts/core';
 import {CanvasRenderer} from 'echarts/renderers';
-import {BarChart, ScatterChart} from 'echarts/charts';
-import {GridComponent, LegendComponent, TitleComponent, TooltipComponent,} from 'echarts/components';
+import {BarChart, PieChart} from 'echarts/charts';
+import {GridComponent, LegendComponent, TitleComponent, TooltipComponent} from 'echarts/components';
 import VChart from 'vue-echarts';
 import {visualizationApi} from '@/lib/api';
+import {useTheme} from '@/composables/useTheme';
+import {getChartTheme} from '@/lib/theme';
 
 // 注册 ECharts 组件
 use([
   CanvasRenderer,
   BarChart,
-  ScatterChart,
+  PieChart,
   TitleComponent,
   TooltipComponent,
   LegendComponent,
   GridComponent,
 ]);
+
+// 获取主题状态
+const { isDark } = useTheme();
+
+// 应用主题
+const getEchartTheme = computed(() => {
+  return getChartTheme(isDark.value);
+});
 
 // 数据存储
 const budgetData = ref([]);
@@ -124,6 +134,7 @@ const budgetRevenueChartOption = computed(() => {
   });
 
   return {
+    ...getEchartTheme.value,
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -199,6 +210,7 @@ const runtimeChartOption = computed(() => {
   });
 
   return {
+    ...getEchartTheme.value,
     tooltip: {
       trigger: 'axis',
       formatter: function(params: any) {
@@ -250,9 +262,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.h-32 {
-  height: 8rem;
-}
 .h-50 {
   height: 12.5rem;
 }

@@ -9,15 +9,15 @@
             <n-card :bordered="false" size="small" class="movie-count-card stat-card">
               <n-space vertical size="small">
                 <n-space justify="space-between" align="center">
-                  <span class="text-subtitle">总电影数量</span>
+                  <n-text class="text-subtitle">总电影数量</n-text>
                   <n-icon size="20" :color="'#336cfb'" :depth="3">
                     <film-icon></film-icon>
                   </n-icon>
                 </n-space>
                 <span class="text-header">{{ stats.totalMovies }}</span>
                 <div class="chart-container">
-                  <v-chart class="w-full h-full" :option="movieCountChartOption" autoresize />
-        </div>
+                  <v-chart class="w-full h-full" :option="movieCountChartOption" :autoresize="true"></v-chart>
+                </div>
               </n-space>
             </n-card>
           </n-gi>
@@ -34,8 +34,8 @@
                 </n-space>
                 <span class="text-header">{{ parseFloat(stats.avgRating).toFixed(1) }}</span>
                 <div class="chart-container">
-                  <v-chart class="w-full h-full" :option="ratingGaugeOption" autoresize />
-        </div>
+                  <v-chart class="w-full h-full" :option="ratingGaugeOption" :autoresize="true"></v-chart>
+                </div>
               </n-space>
             </n-card>
           </n-gi>
@@ -51,9 +51,7 @@
                   </n-icon>
                 </n-space>
                 <span class="text-header">{{ formatRuntime(stats.longestMovie?.runtime) }}</span>
-                <n-ellipsis :line-clamp="1" class="text-body">
-                  {{ stats.longestMovie?.title }}
-                </n-ellipsis>
+                <n-ellipsis :line-clamp="1" class="text-body" :content="stats.longestMovie?.title || ''"></n-ellipsis>
               </n-space>
             </n-card>
           </n-gi>
@@ -69,8 +67,8 @@
                   <span class="font-medium">评分分布</span>
         </div>
                 <div class="chart-container-rating">
-                  <v-chart class="w-full h-full" :option="ratingDistributionOption" autoresize />
-        </div>
+                  <v-chart class="w-full h-full" :option="ratingDistributionOption" :autoresize="true"></v-chart>
+                </div>
               </n-space>
             </n-card>
           </n-gi>
@@ -363,10 +361,7 @@ const ratingDistributionOption = computed(() => ({
           return ratingColorMap[params.dataIndex];
         }
       },
-      animation: true,
-      animationDelay: function (idx: number) {
-        return idx * 30;
-      }
+      animation: true
     }
   ],
   tooltip: {
@@ -401,17 +396,9 @@ const ratingDistributionOption = computed(() => ({
 .runtime-card {
   background-color: rgba(139, 92, 246, 0.08);
 }
-.text-subtitle {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.65);
-}
 .text-header {
   font-size: 20px;
   font-weight: 600;
-}
-.text-body {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.45);
 }
 .movie-item-title {
   font-size: 14px;

@@ -1,7 +1,6 @@
 <template>
-  <div class="min-h-screen dark-bg">
-    <main class="container mx-auto px-6 py-8">
-      <h1 class="text-2xl font-bold mb-6 dark-text">高级电影数据分析</h1>
+    <n-card class="container mx-auto px-6 py-8">
+      <h1 class="text-2xl font-bold mb-6">高级电影数据分析</h1>
 
       <!-- 主要内容区域 -->
       <n-grid :cols="24" :x-gap="12" :y-gap="16">
@@ -22,9 +21,9 @@
 
         <!-- 跨职业创作者分析 -->
         <n-gi :span="24">
-          <n-card title="跨职业电影创作者分析" class="advanced-card">
+          <n-card title="跨职业电影创作者分析">
             <n-space vertical>
-              <n-space class="filter-container">
+              <n-space>
                 <n-select
                   v-model:value="crossRoleLimit"
                   :options="limitOptions"
@@ -38,13 +37,13 @@
               </n-space>
 
               <div>
-                <div v-if="crossRoleLoading" class="loading-container">
+                <div v-if="crossRoleLoading">
                   <n-spin size="large" />
                 </div>
-                <div v-else-if="crossRoleError" class="error-container">
+                <div v-else-if="crossRoleError">
                   <n-alert type="error" :title="crossRoleError" />
                 </div>
-                <div v-else-if="!crossRoleData || crossRoleData.length === 0" class="empty-container">
+                <div v-else-if="!crossRoleData || crossRoleData.length === 0">
                   <n-empty description="暂无数据" />
                 </div>
                 <div v-else>
@@ -64,9 +63,9 @@
 
         <!-- 顶级摄影指导分析 -->
         <n-gi :span="12">
-          <n-card title="顶级摄影指导分析" class="advanced-card">
+          <n-card title="顶级摄影指导分析">
             <n-space vertical>
-              <n-space class="filter-container">
+              <n-space>
                 <n-select
                   v-model:value="cinematographerLimit"
                   :options="limitOptions"
@@ -80,13 +79,13 @@
               </n-space>
 
               <div>
-                <div v-if="cinematographerLoading" class="loading-container">
+                <div v-if="cinematographerLoading">
                   <n-spin size="large" />
                 </div>
-                <div v-else-if="cinematographerError" class="error-container">
+                <div v-else-if="cinematographerError">
                   <n-alert type="error" :title="cinematographerError" />
                 </div>
-                <div v-else-if="!cinematographerData || cinematographerData.length === 0" class="empty-container">
+                <div v-else-if="!cinematographerData || cinematographerData.length === 0">
                   <n-empty description="暂无数据" />
                 </div>
                 <div v-else>
@@ -106,9 +105,9 @@
 
         <!-- 顶级音乐作曲家分析 -->
         <n-gi :span="12">
-          <n-card title="顶级音乐作曲家分析" class="advanced-card">
+          <n-card title="顶级音乐作曲家分析">
             <n-space vertical>
-              <n-space class="filter-container">
+              <n-space>
                 <n-select
                   v-model:value="composerLimit"
                   :options="limitOptions"
@@ -122,13 +121,13 @@
               </n-space>
 
               <div>
-                <div v-if="composerLoading" class="loading-container">
+                <div v-if="composerLoading">
                   <n-spin size="large" />
                 </div>
-                <div v-else-if="composerError" class="error-container">
+                <div v-else-if="composerError">
                   <n-alert type="error" :title="composerError" />
                 </div>
-                <div v-else-if="!composerData || composerData.length === 0" class="empty-container">
+                <div v-else-if="!composerData || composerData.length === 0">
                   <n-empty description="暂无数据" />
                 </div>
                 <div v-else>
@@ -146,8 +145,7 @@
           </n-card>
         </n-gi>
       </n-grid>
-    </main>
-  </div>
+    </n-card>
 </template>
 
 <script setup lang="ts">
@@ -165,13 +163,13 @@ const { isDark } = useTheme();
 
 // 定义数据类型
 interface CrossRolePersonData {
-  person_name: string;
-  movie_count: number;
-  roles: string[];
-  role_count: number;
-  avg_rating: string;
+  person_name?: string;
+  movie_count?: number;
+  roles?: string[];
+  role_count?: number;
+  avg_rating?: string;
   movies?: {
-    title: string;
+    title?: string;
     release_date?: string;
     vote_average?: string;
   }[];
@@ -181,12 +179,12 @@ interface FilmCreatorData {
   person_name?: string;
   cinematographer_name?: string;
   composer_name?: string;
-  movie_count: number;
-  avg_rating: string;
-  top_movies: {
-    title: string;
-    release_date: string;
-    vote_average: string;
+  movie_count?: number;
+  avg_rating?: string;
+  top_movies?: {
+    title?: string;
+    release_date?: string;
+    vote_average?: string;
   }[];
 }
 
@@ -228,35 +226,44 @@ const crossRoleColumns = computed<DataTableColumns>(() => [
   {
     title: '姓名',
     key: 'person_name',
-    width: 150
+    width: 150,
+    render(row: any) {
+      return row?.person_name || '未知';
+    }
   },
   {
     title: '电影数量',
     key: 'movie_count',
     width: 100,
     sorter: 'default',
-    sortOrder: 'descend'
+    sortOrder: 'descend',
+    render(row: any) {
+      return row?.movie_count || 0;
+    }
   },
   {
     title: '担任角色',
     key: 'roles',
     width: 200,
-    render(row) {
-      return Array.isArray(row?.roles) ? row.roles.join(', ') : '';
+    render(row: any) {
+      return row?.roles && Array.isArray(row.roles) ? row.roles.join(', ') : '';
     }
   },
   {
     title: '角色数量',
     key: 'role_count',
-    width: 100
+    width: 100,
+    render(row: any) {
+      return row?.role_count || 0;
+    }
   },
   {
     title: '平均评分',
     key: 'avg_rating',
     width: 120,
-    render(row) {
-      const ratingValue = parseFloat(row.avg_rating?.toString() || '0') / 2;
-      const ratingText = row.avg_rating?.toString() || '0';
+    render(row: any) {
+      const ratingValue = parseFloat(String(row?.avg_rating || '0')) / 2;
+      const ratingText = row?.avg_rating?.toString() || '0';
 
       return h('div', { class: 'flex items-center' }, [
         h(NRate, {
@@ -272,7 +279,7 @@ const crossRoleColumns = computed<DataTableColumns>(() => [
   {
     title: '代表作品',
     key: 'movies',
-    render(row) {
+    render(row: any) {
       if (!row?.movies || !Array.isArray(row.movies) || row.movies.length === 0) {
         return '暂无数据';
       }
@@ -287,43 +294,49 @@ const cinematographerColumns = computed<DataTableColumns>(() => [
   {
     title: '摄影指导',
     key: 'cinematographer_name',
-    width: 150
+    width: 150,
+    render(row: any) {
+      return row?.cinematographer_name || '未知';
+    }
   },
   {
     title: '电影数量',
     key: 'movie_count',
     width: 100,
     sorter: 'default',
-    sortOrder: 'descend'
+    sortOrder: 'descend',
+    render(row: any) {
+      return row?.movie_count || 0;
+    }
   },
   {
     title: '平均评分',
     key: 'avg_rating',
     width: 120,
-    render(row) {
-      const ratingValue = parseFloat(row.avg_rating?.toString() || '0') / 2;
-      const ratingText = row.avg_rating?.toString() || '0';
+    render(row: any) {
+      const ratingValue = parseFloat(String(row?.avg_rating || '0')) / 2;
+      const ratingText = row?.avg_rating?.toString() || '0';
 
-      return h('div', { class: 'flex items-center' }, [
+      return h('div', { style: 'display: flex; align-items: center;' }, [
         h(NRate, {
           readonly: true,
           size: 'small',
           value: ratingValue,
           allowHalf: true
         }),
-        h('span', { class: 'ml-2' }, ratingText)
+        h('span', { style: 'margin-left: 8px;' }, ratingText)
       ]);
     }
   },
   {
     title: '代表作品',
     key: 'top_movies',
-    render(row) {
-      if (!row.top_movies || !Array.isArray(row.top_movies) || row.top_movies.length === 0) {
+    render(row: any) {
+      if (!row?.top_movies || !Array.isArray(row.top_movies) || row.top_movies.length === 0) {
         return '暂无数据';
       }
 
-      return row.top_movies.map((movie: any) => movie.title || '未知电影').join(', ');
+      return row.top_movies.map((movie: any) => movie?.title || '未知电影').join(', ');
     }
   }
 ]);
@@ -333,43 +346,49 @@ const composerColumns = computed<DataTableColumns>(() => [
   {
     title: '音乐作曲家',
     key: 'composer_name',
-    width: 150
+    width: 150,
+    render(row: any) {
+      return row?.composer_name || '未知';
+    }
   },
   {
     title: '电影数量',
     key: 'movie_count',
     width: 100,
     sorter: 'default',
-    sortOrder: 'descend'
+    sortOrder: 'descend',
+    render(row: any) {
+      return row?.movie_count || 0;
+    }
   },
   {
     title: '平均评分',
     key: 'avg_rating',
     width: 120,
-    render(row) {
-      const ratingValue = parseFloat(row.avg_rating?.toString() || '0') / 2;
-      const ratingText = row.avg_rating?.toString() || '0';
+    render(row: any) {
+      const ratingValue = parseFloat(String(row?.avg_rating || '0')) / 2;
+      const ratingText = row?.avg_rating?.toString() || '0';
 
-      return h('div', { class: 'flex items-center' }, [
+      return h('div', { style: 'display: flex; align-items: center;' }, [
         h(NRate, {
           readonly: true,
           size: 'small',
           value: ratingValue,
           allowHalf: true
         }),
-        h('span', { class: 'ml-2' }, ratingText)
+        h('span', { style: 'margin-left: 8px;' }, ratingText)
       ]);
     }
   },
   {
     title: '代表作品',
     key: 'top_movies',
-    render(row) {
-      if (!row.top_movies || !Array.isArray(row.top_movies) || row.top_movies.length === 0) {
+    render(row: any) {
+      if (!row?.top_movies || !Array.isArray(row.top_movies) || row.top_movies.length === 0) {
         return '暂无数据';
       }
 
-      return row.top_movies.map((movie: any) => movie.title || '未知电影').join(', ');
+      return row.top_movies.map((movie: any) => movie?.title || '未知电影').join(', ');
     }
   }
 ]);
@@ -378,6 +397,7 @@ const composerColumns = computed<DataTableColumns>(() => [
 const fetchCrossRoleData = async () => {
   crossRoleLoading.value = true;
   crossRoleError.value = '';
+  crossRoleData.value = []; // 清空现有数据，避免显示旧数据
 
   try {
     const response = await visualizationApi.getCrossRoleTalents(crossRoleLimit.value);
@@ -406,6 +426,7 @@ const fetchCrossRoleData = async () => {
 const fetchCinematographerData = async () => {
   cinematographerLoading.value = true;
   cinematographerError.value = '';
+  cinematographerData.value = []; // 清空现有数据，避免显示旧数据
 
   try {
     const response = await visualizationApi.getTopCinematographers(cinematographerLimit.value);
@@ -434,6 +455,7 @@ const fetchCinematographerData = async () => {
 const fetchComposerData = async () => {
   composerLoading.value = true;
   composerError.value = '';
+  composerData.value = []; // 清空现有数据，避免显示旧数据
 
   try {
     const response = await visualizationApi.getTopComposers(composerLimit.value);
@@ -467,74 +489,4 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.dark-bg {
-  background-color: v-bind("isDark ? '#111827' : '#f9fafb'");
-  transition: background-color 0.3s ease;
-}
-
-.dark-text {
-  color: v-bind("isDark ? '#f9fafb' : '#111827'");
-}
-
-.advanced-card {
-  height: 100%;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.advanced-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.loading-container, .error-container, .empty-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-}
-
-.flex {
-  display: flex;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.ml-2 {
-  margin-left: 0.5rem;
-}
-
-.mt-2 {
-  margin-top: 0.5rem;
-}
-
-.text-sm {
-  font-size: 0.875rem;
-}
-
-.text-xs {
-  font-size: 0.75rem;
-}
-
-.text-xl {
-  font-size: 1.25rem;
-}
-
-.font-medium {
-  font-weight: 500;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.filter-container {
-  margin-bottom: 1rem;
-}
 </style>

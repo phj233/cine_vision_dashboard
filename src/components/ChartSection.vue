@@ -4,7 +4,7 @@
     <n-gi :span="1">
       <n-card title="评分分布" size="small" hoverable :bordered="false">
         <div class="h-72">
-          <v-chart class="w-full h-full" :option="ratingChartOption" :theme="currentChartTheme" autoresize />
+          <v-chart class="w-full h-full" :option="ratingChartOption" :theme="currentChartTheme" :autoresize="true"></v-chart>
         </div>
       </n-card>
     </n-gi>
@@ -13,7 +13,7 @@
     <n-gi :span="1">
       <n-card title="电影类型分布" size="small" hoverable :bordered="false">
         <div class="h-72">
-          <v-chart class="w-full h-full" :option="genreChartOption" :theme="currentChartTheme" autoresize />
+          <v-chart class="w-full h-full" :option="genreChartOption" :theme="currentChartTheme" :autoresize="true"></v-chart>
         </div>
       </n-card>
     </n-gi>
@@ -45,7 +45,7 @@ use([
 ]);
 
 // 获取主题
-const { isDark, themeVars } = useTheme();
+const { isDark} = useTheme();
 const currentChartTheme = ref(getChartTheme(isDark.value));
 
 // 监听主题变化
@@ -57,6 +57,11 @@ watch(isDark, (newIsDark) => {
 const props = defineProps<{
   movies: any[];
 }>();
+
+// 应用主题
+const getEchartTheme = computed(() => {
+  return getChartTheme(isDark.value);
+});
 
 // 评分分布图表数据
 const ratingChartOption = computed(() => {
@@ -98,6 +103,7 @@ const ratingChartOption = computed(() => {
     : ['#DC2626', '#F87171', '#FB923C', '#FBBF24', '#84CC16', '#22C55E'];
 
   return {
+    ...getEchartTheme.value,
     tooltip: {
       trigger: "item",
       formatter: "{b}: {c} ({d}%)",
@@ -187,6 +193,7 @@ const genreChartOption = computed(() => {
     : ["#3B82F6", "#10B981", "#8B5CF6", "#F59E0B", "#EF4444", "#A855F7", "#14B8A6", "#475569"];
 
   return {
+    ...getEchartTheme.value,
     tooltip: {
       trigger: "axis",
       axisPointer: {

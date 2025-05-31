@@ -1,8 +1,8 @@
 <template>
-  <div class="chart-container">
-    <n-card title="顶级导演分析" class="chart-card">
+  <div>
+    <n-card title="顶级导演分析">
       <n-space vertical>
-        <n-space class="filter-container">
+        <n-space>
           <n-select
             v-model:value="minMovies"
             :options="minMoviesOptions"
@@ -30,54 +30,54 @@
         </n-space>
 
         <div>
-          <div v-if="loading" class="loading-container">
+          <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-spin size="large" />
           </div>
-          <div v-else-if="error" class="error-container">
+          <div v-else-if="error" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-alert type="error" :title="error" />
           </div>
-          <div v-else-if="!chartData || chartData.length === 0" class="empty-container">
+          <div v-else-if="!chartData || chartData.length === 0" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-empty description="暂无数据" />
           </div>
-          <div v-else class="chart-wrapper">
-            <v-chart class="chart" :option="chartOption" autoresize />
+          <div v-else>
+            <v-chart style="height: 400px; width: 100%;" :option="chartOption" :autoresize="true"></v-chart>
 
-            <div class="director-list">
+            <div style="margin-top: 2rem;">
               <n-collapse>
                 <n-collapse-item
                   v-for="(director, index) in chartData"
                   :key="index"
-                  :title="director.director_name || '未知导演'"
+                  :title="director?.director_name || '未知导演'"
                   :name="index"
                 >
                   <n-space vertical>
                     <n-descriptions bordered size="small" :column="2">
                       <n-descriptions-item label="电影数量">
-                        {{ director.movie_count || 0 }}
+                        {{ director?.movie_count || 0 }}
                       </n-descriptions-item>
                       <n-descriptions-item label="平均评分">
                         <n-rate
                           readonly
                           size="small"
-                          :value="parseFloat(director.avg_rating || 0) / 2"
+                          :value="parseFloat(String(director?.avg_rating || 0)) / 2"
                           allow-half
                         />
-                        {{ director.avg_rating || '0' }}
+                        {{ director?.avg_rating || '0' }}
                       </n-descriptions-item>
                       <n-descriptions-item label="总票房">
-                        {{ formatCurrency(director.total_revenue || 0) }}
+                        {{ formatCurrency(director?.total_revenue || 0) }}
                       </n-descriptions-item>
                     </n-descriptions>
 
                     <n-divider title-placement="left">代表作品</n-divider>
 
                     <n-list hoverable clickable>
-                      <n-list-item v-for="(movie, mIndex) in (director.top_movies || [])" :key="mIndex">
+                      <n-list-item v-for="(movie, mIndex) in (director?.top_movies || [])" :key="mIndex">
                         <n-thing>
                           <template #header>
                             <n-space align="center">
-                              {{ movie.title || '未知电影' }}
-                              <n-tag type="success" size="small">{{ movie.release_date || '未知日期' }}</n-tag>
+                              {{ movie?.title || '未知电影' }}
+                              <n-tag type="success" size="small">{{ movie?.release_date || '未知日期' }}</n-tag>
                             </n-space>
                           </template>
                           <template #description>
@@ -85,10 +85,10 @@
                               <n-rate
                                 readonly
                                 size="small"
-                                :value="parseFloat(movie.vote_average || 0) / 2"
+                                :value="parseFloat(String(movie?.vote_average || 0)) / 2"
                                 allow-half
                               />
-                              {{ movie.vote_average || '0' }}
+                              {{ movie?.vote_average || '0' }}
                             </n-space>
                           </template>
                         </n-thing>
@@ -187,14 +187,14 @@ const sortOptions = [
 
 // 图表数据
 interface DirectorData {
-  director_name: string;
-  movie_count: number;
-  avg_rating: string;
-  total_revenue: number | string;
+  director_name?: string;
+  movie_count?: number;
+  avg_rating?: string;
+  total_revenue?: number | string;
   top_movies?: {
-    title: string;
-    release_date: string;
-    vote_average: string;
+    title?: string;
+    release_date?: string;
+    vote_average?: string;
   }[];
 }
 
@@ -326,7 +326,7 @@ const chartOption = computed(() => {
             : formatter.replace('{value}', '{c}')
         },
         itemStyle: {
-          color: function(params) {
+          color: function(params:  any) {
             // 自定义颜色渐变
             const colorList = [
               '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
@@ -358,6 +358,7 @@ const chartOption = computed(() => {
 const fetchData = async () => {
   loading.value = true;
   error.value = '';
+  chartData.value = []; // 清空现有数据，避免显示旧数据
 
   try {
     const response = await visualizationApi.getTopDirectors(
@@ -390,43 +391,3 @@ const fetchData = async () => {
 // 组件挂载时加载数据
 onMounted(fetchData);
 </script>
-
-<style scoped>
-.chart-container {
-  margin-bottom: 1.5rem;
-}
-
-.chart-card {
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.chart-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.filter-container {
-  margin-bottom: 1rem;
-}
-
-.loading-container, .error-container, .empty-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-}
-
-.chart-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.chart {
-  height: 400px;
-  width: 100%;
-}
-
-.director-list {
-  margin-top: 2rem;
-}
-</style>

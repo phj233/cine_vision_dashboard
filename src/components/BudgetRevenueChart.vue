@@ -1,8 +1,8 @@
 <template>
-  <div class="chart-container">
-    <n-card title="预算与票房关系分析" class="chart-card">
+  <div>
+    <n-card title="预算与票房关系分析">
       <n-space vertical>
-        <n-space class="filter-container">
+        <n-space>
           <n-date-picker
             v-model:value="yearRange"
             type="daterange"
@@ -32,17 +32,17 @@
         </n-space>
 
         <div>
-          <div v-if="loading" class="loading-container">
+          <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-spin size="large" />
           </div>
-          <div v-else-if="error" class="error-container">
+          <div v-else-if="error" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-alert type="error" :title="error" />
           </div>
-          <div v-else-if="!chartData.buckets || chartData.buckets.length === 0" class="empty-container">
+          <div v-else-if="!chartData.buckets || chartData.buckets.length === 0" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-empty description="暂无数据" />
           </div>
-          <div v-else class="chart-wrapper">
-            <v-chart class="chart" :option="chartOption" autoresize />
+          <div v-else>
+            <v-chart style="height: 450px; width: 100%;" :option="chartOption" :autoresize="true"></v-chart>
 
             <n-divider>总体统计</n-divider>
 
@@ -50,7 +50,7 @@
               <n-gi>
                 <n-statistic
                   label="平均投资回报率"
-                  :value="parseFloat(chartData.overall?.avg_roi || 0)"
+                  :value="parseFloat(String(chartData.overall?.avg_roi || 0))"
                   :precision="2"
                 >
                   <template #suffix>
@@ -164,7 +164,7 @@ const chartData = ref<{
 // 筛选选项
 const currentYear = new Date().getFullYear();
 // 使用时间戳数组而非Date对象数组，兼容NDatePicker的daterange类型
-const yearRange = ref<[number, number]>([
+const yearRange = ref<[number, number] | null>([
   new Date(1990, 0, 1).getTime(),
   new Date(currentYear, 11, 31).getTime()
 ]);
@@ -200,7 +200,7 @@ const pagination = ref({
 });
 
 // 格式化货币数值
-const formatCurrency = (value: string | number) => {
+const formatCurrency = (value: string | number | undefined) => {
   if (!value) return '¥0';
 
   const number = typeof value === 'string' ? parseFloat(value) : value;
@@ -223,20 +223,23 @@ const columns = computed<DataTableColumns>(() => [
     key: 'budget_range',
     width: 180,
     render(row) {
-      return `${formatCurrency(row.budget_bucket)} - ${formatCurrency(row.budget_bucket_end)}`;
+      return `${formatCurrency(row?.budget_bucket)} - ${formatCurrency(row?.budget_bucket_end)}`;
     }
   },
   {
     title: '电影数量',
     key: 'movie_count',
-    width: 100
+    width: 100,
+    render(row) {
+      return row?.movie_count || 0;
+    }
   },
   {
     title: '平均票房',
     key: 'avg_revenue',
     width: 130,
     render(row) {
-      return formatCurrency(row.avg_revenue);
+      return formatCurrency(row?.avg_revenue);
     }
   },
   {
@@ -244,7 +247,7 @@ const columns = computed<DataTableColumns>(() => [
     key: 'avg_roi',
     width: 120,
     render(row) {
-      const roi = parseFloat(row.avg_roi);
+      const roi = parseFloat(row?.avg_roi || '0');
       return `${roi.toFixed(2)}倍`;
     }
   }
@@ -303,6 +306,8 @@ const chartOption = computed(() => {
   const roiLine1 = generateRoiLine(2);
   const roiLine2 = generateRoiLine(5);
   const roiLine3 = generateRoiLine(10);
+  // 添加平均ROI参考线
+  const avgRoiLine = generateRoiLine(avgRoi);
 
   return {
     backgroundColor: 'transparent',
@@ -339,7 +344,7 @@ const chartOption = computed(() => {
     legend: {
       right: '10%',
       top: '5%',
-      data: ['电影分布', '收支平衡线', '2倍回报线', '5倍回报线', '10倍回报线'],
+      data: ['电影分布', '收支平衡线', '2倍回报线', '5倍回报线', '10倍回报线', `平均回报线(${avgRoi.toFixed(2)}倍)`],
       textStyle: {
         color: isDark.value ? '#ddd' : '#666'
       }
@@ -408,7 +413,7 @@ const chartOption = computed(() => {
           label: {
             show: true,
             formatter: function (param: any) {
-              return `ROI: ${param.data[1] / param.data[0]}倍`;
+              return `ROI: ${(param.data[1] / param.data[0]).toFixed(2)}倍`;
             },
             position: 'top'
           }
@@ -469,6 +474,18 @@ const chartOption = computed(() => {
           type: 'dashed'
         },
         data: roiLine3
+      },
+      {
+        name: `平均回报线(${avgRoi.toFixed(2)}倍)`,
+        type: 'line',
+        symbol: 'none',
+        smooth: true,
+        lineStyle: {
+          color: '#67c23a',
+          type: 'dotted',
+          width: 2
+        },
+        data: avgRoiLine
       }
     ],
     toolbox: {
@@ -537,6 +554,7 @@ const getYearFromValue = (value: any): number => {
 const fetchData = async () => {
   loading.value = true;
   error.value = '';
+  chartData.value = { buckets: [], overall: null }; // 清空现有数据
 
   // 处理yearRange可能为null的情况（用户清除了日期选择）
   let startYear = 1990;
@@ -583,39 +601,3 @@ const fetchData = async () => {
 // 组件挂载时加载数据
 onMounted(fetchData);
 </script>
-
-<style scoped>
-.chart-container {
-  margin-bottom: 1.5rem;
-}
-
-.chart-card {
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.chart-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.filter-container {
-  margin-bottom: 1rem;
-}
-
-.loading-container, .error-container, .empty-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-}
-
-.chart-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.chart {
-  height: 450px;
-  width: 100%;
-}
-</style>

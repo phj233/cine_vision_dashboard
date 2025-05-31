@@ -111,6 +111,7 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -168,4 +169,77 @@
 /* 容器背景颜色修复 */
 .dark .container {
   background-color: transparent;
+}
+
+/* 修复暗黑模式下的margin和padding白色问题 */
+.dark * {
+  --n-bezier: cubic-bezier(.4, 0, .2, 1);
+  --n-color: #1f2937 !important;
+  --n-color-hover: #1f2937 !important;
+  --n-color-pressed: #1f2937 !important;
+  --n-color-modal: #1f2937 !important;
+  --n-color-target: #1f2937 !important;
+  --n-border-color: #374151 !important;
+  --n-border-color-modal: #374151 !important;
+  --n-border-color-popover: #374151 !important;
+  --n-close-color-hover: #4b5563 !important;
+  --n-close-color-pressed: #6b7280 !important;
+  --n-close-icon-color: #9ca3af !important;
+  --n-close-icon-color-hover: #d1d5db !important;
+  --n-close-icon-color-pressed: #e5e7eb !important;
+}
+
+/* 修复naive-ui组件的样式覆盖 */
+.dark .n-layout-header,
+.dark .n-layout-footer,
+.dark .n-layout-content,
+.dark .n-layout-sider,
+.dark .n-layout {
+  background-color: #111827 !important;
+  color: #e5e7eb !important;
+}
+
+.dark .n-base-selection,
+.dark .n-base-select-menu,
+.dark .n-input,
+.dark .n-button:not(.n-button--primary-type),
+.dark .n-tabs,
+.dark .n-tabs-nav,
+.dark .n-dropdown-menu {
+  background-color: #1f2937 !important;
+  color: #e5e7eb !important;
+  border-color: #374151 !important;
+}
+
+/* 修复间距中的白色问题 */
+.dark .n-layout-scroll-container,
+.dark .n-layout-sider-scroll-container {
+  background-color: #111827 !important;
+}
+
+/* 确保无缝边距 */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* 修复naive-ui卡片白色边框 */
+.dark .n-card::before {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .n-card::after {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* 消除所有可能的边距和轮廓 */
+.dark .n-layout,
+.dark .n-layout-sider,
+.dark .n-layout-content,
+.dark .n-card {
+  box-shadow: none !important;
+  outline: none !important;
 }

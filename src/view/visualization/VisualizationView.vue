@@ -1,210 +1,279 @@
 <template>
-  <div class="min-h-screen dark-bg">
+  <n-card>
     <main class="container mx-auto px-6 py-8">
-      <h1 class="text-2xl font-bold mb-6 dark-text">电影数据可视化</h1>
+      <h1 class="text-2xl font-bold mb-6">数据可视化中心</h1>
 
       <!-- 图表过滤器 -->
-      <div class="dark-card rounded-lg shadow-sm p-4 mb-6">
-        <div class="flex flex-wrap gap-4">
-          <div class="flex-1">
-            <label class="block text-sm font-medium dark-text-secondary mb-1">图表选择</label>
-            <select
-              v-model="selectedChart"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option value="rating">评分分布</option>
-              <option value="yearly">年度趋势</option>
-              <option value="genre">类型比较</option>
-              <option value="runtime">时长分布</option>
-              <option value="companies">制作公司排名</option>
-              <option value="budget">预算与票房关系</option>
-            </select>
-          </div>
+      <n-card style="margin-bottom: 1.5rem;" embedded>
+        <n-form>
+          <n-grid :cols="24" :x-gap="12" :y-gap="12">
+            <n-gi :span="6">
+              <n-form-item label="图表选择">
+                <n-select
+                  v-model:value="selectedChart"
+                  :options="[
+                    { label: '评分分布', value: 'rating' },
+                    { label: '年度趋势', value: 'yearly' },
+                    { label: '类型比较', value: 'genre' },
+                    { label: '时长分布', value: 'runtime' },
+                    { label: '制作公司排名', value: 'companies' },
+                    { label: '预算与票房关系', value: 'budget' }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div v-if="selectedChart === 'rating'" class="flex-1">
-            <label class="block text-sm font-medium dark-text-secondary mb-1">评分区间大小</label>
-            <select
-              v-model="bucketSize"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option :value="0.5">0.5</option>
-              <option :value="1">1.0</option>
-              <option :value="0.25">0.25</option>
-            </select>
-          </div>
+            <n-gi :span="6" v-if="selectedChart === 'rating'">
+              <n-form-item label="评分区间大小">
+                <n-select
+                  v-model:value="bucketSize"
+                  :options="[
+                    { label: '0.5', value: 0.5 },
+                    { label: '1.0', value: 1 },
+                    { label: '0.25', value: 0.25 }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div v-if="selectedChart === 'yearly'" class="flex-1">
-            <label class="block text-sm font-medium dark-text-secondary mb-1">年份范围</label>
-            <div class="flex gap-2">
-              <input
-                type="number"
-                v-model="startYear"
-                placeholder="起始年份"
-                class="w-1/2 border border-gray-300 rounded-md p-2" />
-              <input
-                type="number"
-                v-model="endYear"
-                placeholder="结束年份"
-                class="w-1/2 border border-gray-300 rounded-md p-2" />
-            </div>
-          </div>
+            <n-gi :span="12" v-if="selectedChart === 'yearly'">
+              <n-form-item label="年份范围">
+                <n-grid :cols="2" :x-gap="12">
+                  <n-gi>
+                    <n-input-number
+                      v-model:value="startYear"
+                      placeholder="起始年份"
+                      clearable
+                    />
+                  </n-gi>
+                  <n-gi>
+                    <n-input-number
+                      v-model:value="endYear"
+                      placeholder="结束年份"
+                      clearable
+                    />
+                  </n-gi>
+                </n-grid>
+              </n-form-item>
+            </n-gi>
 
-          <div v-if="selectedChart === 'genre'" class="flex-1">
-            <label class="block text-sm font-medium dark-text-secondary mb-1">比较指标</label>
-            <select
-              v-model="genreMetric"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option value="avg_rating">平均评分</option>
-              <option value="avg_budget">平均预算</option>
-              <option value="avg_revenue">平均票房</option>
-              <option value="count">电影数量</option>
-              <option value="avg_runtime">平均时长</option>
-            </select>
-          </div>
+            <n-gi :span="6" v-if="selectedChart === 'genre'">
+              <n-form-item label="比较指标">
+                <n-select
+                  v-model:value="genreMetric"
+                  :options="[
+                    { label: '平均评分', value: 'avg_rating' },
+                    { label: '平均预算', value: 'avg_budget' },
+                    { label: '平均票房', value: 'avg_revenue' },
+                    { label: '电影数量', value: 'count' },
+                    { label: '平均时长', value: 'avg_runtime' }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div v-if="selectedChart === 'runtime'" class="flex-1">
-            <label class="block text-sm font-medium dark-text-secondary mb-1">时长区间大小（分钟）</label>
-            <select
-              v-model="runtimeBucketSize"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option :value="15">15</option>
-              <option :value="30">30</option>
-              <option :value="10">10</option>
-            </select>
-          </div>
+            <n-gi :span="6" v-if="selectedChart === 'runtime'">
+              <n-form-item label="时长区间大小（分钟）">
+                <n-select
+                  v-model:value="runtimeBucketSize"
+                  :options="[
+                    { label: '15', value: 15 },
+                    { label: '30', value: 30 },
+                    { label: '10', value: 10 }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div v-if="selectedChart === 'companies'" class="flex-1">
-            <label class="block text-sm font-medium dark-text-secondary mb-1">排序指标</label>
-            <select
-              v-model="companyMetric"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option value="movie_count">电影数量</option>
-              <option value="avg_rating">平均评分</option>
-              <option value="total_revenue">总票房</option>
-              <option value="avg_revenue">平均票房</option>
-            </select>
-          </div>
+            <n-gi :span="6" v-if="selectedChart === 'companies'">
+              <n-form-item label="排序指标">
+                <n-select
+                  v-model:value="companyMetric"
+                  :options="[
+                    { label: '电影数量', value: 'movie_count' },
+                    { label: '平均评分', value: 'avg_rating' },
+                    { label: '总票房', value: 'total_revenue' },
+                    { label: '平均票房', value: 'avg_revenue' }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div v-if="selectedChart === 'budget'" class="flex-1">
-            <label class="block text-sm font-medium dark-text-secondary mb-1">最低评分人数</label>
-            <select
-              v-model="minVotes"
-              class="w-full border border-gray-300 rounded-md p-2">
-              <option :value="10">10</option>
-              <option :value="50">50</option>
-              <option :value="100">100</option>
-            </select>
-          </div>
+            <n-gi :span="6" v-if="selectedChart === 'budget'">
+              <n-form-item label="最低评分人数">
+                <n-select
+                  v-model:value="minVotes"
+                  :options="[
+                    { label: '10', value: 10 },
+                    { label: '50', value: 50 },
+                    { label: '100', value: 100 }
+                  ]"
+                />
+              </n-form-item>
+            </n-gi>
 
-          <div class="flex items-end">
-            <button
-              @click="loadChartData"
-              class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-              更新图表
-            </button>
-          </div>
-        </div>
-      </div>
+            <n-gi :span="24">
+              <div style="display: flex; justify-content: flex-end;">
+                <n-button
+                  @click="loadChartData"
+                  type="primary">
+                  更新图表
+                </n-button>
+              </div>
+            </n-gi>
+          </n-grid>
+        </n-form>
+      </n-card>
 
       <!-- 图表区域 -->
-      <div class="dark-card-bg rounded-lg shadow-sm p-6">
-        <div v-if="loading" class="flex justify-center items-center h-80">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <n-card>
+        <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 500px;">
+          <n-spin size="large" />
         </div>
 
-        <div v-else class="h-[500px]">
+        <div v-else style="height: 500px; width: 100%;">
           <!-- 评分分布图表 -->
           <v-chart
             v-if="selectedChart === 'rating' && ratingData.length > 0"
-            class="w-full h-full"
+            style="width: 100%; height: 100%;"
             :option="ratingChartOption"
-            autoresize />
+            :autoresize="true"></v-chart>
 
           <!-- 年度趋势图表 -->
           <v-chart
             v-else-if="selectedChart === 'yearly' && yearlyData.length > 0"
-            class="w-full h-full"
+            style="width: 100%; height: 100%;"
             :option="yearlyChartOption"
-            autoresize />
+            :autoresize="true"></v-chart>
 
           <!-- 类型比较图表 -->
           <v-chart
             v-else-if="selectedChart === 'genre' && genreData.length > 0"
-            class="w-full h-full"
+            style="width: 100%; height: 100%;"
             :option="genreChartOption"
-            autoresize />
+            :autoresize="true"></v-chart>
 
           <!-- 时长分布图表 -->
           <v-chart
             v-else-if="selectedChart === 'runtime' && runtimeData.length > 0"
-            class="w-full h-full"
+            style="width: 100%; height: 100%;"
             :option="runtimeChartOption"
-            autoresize />
+            :autoresize="true"></v-chart>
 
           <!-- 制作公司排名图表 -->
           <v-chart
             v-else-if="selectedChart === 'companies' && companiesData.length > 0"
-            class="w-full h-full"
+            style="width: 100%; height: 100%;"
             :option="companiesChartOption"
-            autoresize />
+            :autoresize="true"></v-chart>
 
           <!-- 预算与票房关系图表 -->
           <v-chart
             v-else-if="selectedChart === 'budget' && budgetData.buckets && budgetData.buckets.length > 0"
-            class="w-full h-full"
+            style="width: 100%; height: 100%;"
             :option="budgetChartOption"
-            autoresize />
+            :autoresize="true"></v-chart>
 
-          <div v-else class="flex justify-center items-center h-full">
-            <p class="text-gray-500">暂无数据可显示，请尝试调整过滤条件或选择其他图表</p>
-          </div>
+          <n-empty
+            v-else
+            description="暂无数据可显示，请尝试调整过滤条件或选择其他图表"
+            style="height: 100%; display: flex; flex-direction: column; justify-content: center;" />
         </div>
-      </div>
+      </n-card>
 
       <!-- 数据表格 -->
-      <div v-if="!loading && showTable" class="dark-card-bg rounded-lg shadow-sm p-6 mt-6">
-        <h2 class="text-xl font-semibold mb-4">数据表格</h2>
+      <n-card v-if="!loading && showTable" style="margin-top: 1.5rem;">
+        <n-h2>数据表格</n-h2>
 
         <!-- 评分分布表格 -->
-        <table v-if="selectedChart === 'rating' && ratingData.length > 0" class="w-full border-collapse">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="p-2 text-left">评分区间</th>
-              <th class="p-2 text-left">电影数量</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in ratingData" :key="index" class="border-b">
-              <td class="p-2">{{ parseFloat(item.bucket_start) }} - {{ parseFloat(item.bucket_end) }}</td>
-              <td class="p-2">{{ item.movie_count }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <n-data-table
+          v-if="selectedChart === 'rating' && ratingData.length > 0"
+          :columns="[
+            { title: '评分区间', key: 'bucket_range', render: (row) => `${parseFloat(row.bucket_start)} - ${parseFloat(row.bucket_end)}` },
+            { title: '电影数量', key: 'movie_count' }
+          ]"
+          :data="ratingData"
+          :bordered="false"
+          :pagination="{ pageSize: 10 }"
+          striped
+        />
 
         <!-- 年度趋势表格 -->
-        <table v-else-if="selectedChart === 'yearly' && yearlyData.length > 0" class="w-full border-collapse">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="p-2 text-left">年份</th>
-              <th class="p-2 text-left">电影数量</th>
-              <th class="p-2 text-left">平均评分</th>
-              <th class="p-2 text-left">平均预算</th>
-              <th class="p-2 text-left">平均票房</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in yearlyData" :key="index" class="border-b">
-              <td class="p-2">{{ item.year }}</td>
-              <td class="p-2">{{ item.movie_count }}</td>
-              <td class="p-2">{{ item.avg_rating }}</td>
-              <td class="p-2">{{ formatCurrency(item.avg_budget) }}</td>
-              <td class="p-2">{{ formatCurrency(item.avg_revenue) }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <n-data-table
+          v-else-if="selectedChart === 'yearly' && yearlyData.length > 0"
+          :columns="[
+            { title: '年份', key: 'year' },
+            { title: '电影数量', key: 'movie_count' },
+            { title: '平均评分', key: 'avg_rating' },
+            { title: '平均预算', key: 'avg_budget', render: (row) => formatCurrency(row.avg_budget) },
+            { title: '平均票房', key: 'avg_revenue', render: (row) => formatCurrency(row.avg_revenue) }
+          ]"
+          :data="yearlyData"
+          :bordered="false"
+          :pagination="{ pageSize: 10 }"
+          striped
+        />
 
-        <!-- 其他表格根据需要添加 -->
-      </div>
+        <!-- 类型比较表格 -->
+        <n-data-table
+          v-else-if="selectedChart === 'genre' && genreData.length > 0"
+          :columns="[
+            { title: '电影类型', key: 'genre' },
+            { title: genreData[0]?.metric || '指标', key: 'value' }
+          ]"
+          :data="genreData"
+          :bordered="false"
+          :pagination="{ pageSize: 10 }"
+          striped
+        />
+
+        <!-- 时长分布表格 -->
+        <n-data-table
+          v-else-if="selectedChart === 'runtime' && runtimeData.length > 0"
+          :columns="[
+            { title: '时长区间（分钟）', key: 'bucket_range', render: (row) => `${row.bucket_start} - ${row.bucket_end}` },
+            { title: '电影数量', key: 'movie_count' },
+            { title: '平均评分', key: 'avg_rating' }
+          ]"
+          :data="runtimeData"
+          :bordered="false"
+          :pagination="{ pageSize: 10 }"
+          striped
+        />
+
+        <!-- 制作公司表格 -->
+        <n-data-table
+          v-else-if="selectedChart === 'companies' && companiesData.length > 0"
+          :columns="[
+            { title: '制作公司', key: 'company_name' },
+            { title: '电影数量', key: 'movie_count' },
+            { title: '平均评分', key: 'avg_rating' },
+            { title: '总票房', key: 'total_revenue', render: (row) => formatCurrency(row.total_revenue) },
+            { title: '平均票房', key: 'avg_revenue', render: (row) => formatCurrency(row.avg_revenue) }
+          ]"
+          :data="companiesData"
+          :bordered="false"
+          :pagination="{ pageSize: 10 }"
+          striped
+        />
+
+        <!-- 预算与票房表格 -->
+        <n-data-table
+          v-else-if="selectedChart === 'budget' && budgetData.buckets && budgetData.buckets.length > 0"
+          :columns="[
+            { title: '预算区间', key: 'budget_range', render: (row) => `${formatCurrency(row.budget_bucket)} - ${formatCurrency(row.budget_bucket_end)}` },
+            { title: '电影数量', key: 'movie_count' },
+            { title: '平均票房', key: 'avg_revenue', render: (row) => formatCurrency(row.avg_revenue) },
+            { title: '平均回报率', key: 'avg_roi', render: (row) => `${parseFloat(row.avg_roi).toFixed(2)}倍` }
+          ]"
+          :data="budgetData.buckets"
+          :bordered="false"
+          :pagination="{ pageSize: 10 }"
+          striped
+        />
+      </n-card>
     </main>
-  </div>
+  </n-card>
 </template>
 
 <script setup lang="ts">
@@ -222,7 +291,20 @@ import {
   VisualMapComponent,
 } from 'echarts/components';
 import VChart from 'vue-echarts';
-import {useTheme} from '@/composables/useTheme'
+import {
+  NButton,
+  NCard,
+  NDataTable,
+  NEmpty,
+  NForm,
+  NFormItem,
+  NGi,
+  NGrid,
+  NH2,
+  NInputNumber,
+  NSelect,
+  NSpin
+} from 'naive-ui';
 
 // 注册 ECharts 组件
 use([
@@ -238,8 +320,6 @@ use([
   VisualMapComponent,
 ]);
 
-// 获取主题状态
-const { isDark } = useTheme();
 
 // 状态变量
 const loading = ref(false);
@@ -697,38 +777,3 @@ onMounted(() => {
   loadChartData();
 });
 </script>
-
-<style scoped>
-.chart-container {
-  min-height: 400px;
-  width: 100%;
-}
-
-/* 暗色模式下表单元素样式 */
-.dark select,
-.dark input[type="text"],
-.dark input[type="number"] {
-  background-color: #1f2937;
-  color: #e5e7eb;
-  border-color: #4b5563;
-}
-
-.dark select:focus,
-.dark input[type="text"]:focus,
-.dark input[type="number"]:focus {
-  border-color: #60a5fa;
-  outline: none;
-}
-
-.dark table thead tr {
-  background-color: #1f2937;
-}
-
-.dark table tbody tr {
-  border-color: #374151;
-}
-
-.dark table tbody tr:nth-child(even) {
-  background-color: rgba(55, 65, 81, 0.1);
-}
-</style>

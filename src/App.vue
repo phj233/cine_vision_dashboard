@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppHeader from "@/components/Header.vue";
-import {darkTheme, NConfigProvider, NMessageProvider} from 'naive-ui';
+import {darkTheme, NConfigProvider, NLayout, NLayoutContent, NMessageProvider} from 'naive-ui';
 import {onMounted, provide, ref, watch} from 'vue';
 import {darkThemeOverrides, lightThemeOverrides} from '@/lib/theme';
 
@@ -50,33 +50,20 @@ onMounted(() => {
 
 <template>
   <n-config-provider :theme="theme" :theme-overrides="themeOverrides">
-    <n-message-provider>
-      <!-- 头部导航 -->
-      <AppHeader @toggle-theme="toggleTheme" :dark-mode="theme !== null" />
-      <router-view/>
-    </n-message-provider>
+    <n-notification-provider>
+      <n-message-provider>
+        <n-layout position="absolute">
+          <!-- 头部导航 -->
+          <AppHeader @toggle-theme="toggleTheme" :dark-mode="theme !== null" />
+          <n-layout-content>
+            <router-view/>
+          </n-layout-content>
+        </n-layout>
+      </n-message-provider>
+    </n-notification-provider>
   </n-config-provider>
 </template>
 
 <style>
-/* 根据主题动态设置全局样式 */
-html, body {
-  transition: background-color 0.3s ease, color 0.3s ease;
-  min-height: 100%;
-}
 
-/* 主容器设置，确保内容在暗色模式下正确显示 */
-#app {
-  min-height: 100vh;
-}
-
-body {
-  background-color: white;
-  color: #1f2937;
-}
-
-body.dark {
-  background-color: #1a1a1a;
-  color: #e5e7eb;
-}
 </style>

@@ -1,7 +1,6 @@
 <template>
-  <div class="min-h-screen">
-    <!-- 主内容区 -->
-    <main class="container mx-auto px-6 py-8">
+  <!-- 主内容区 -->
+  <n-card class="mx-auto px-6 py-8 min-h-screen">
       <!-- 顶部统计信息区域 -->
       <StatCards :stats="stats" />
 
@@ -26,8 +25,7 @@
 
       <!-- 详细数据表格 -->
       <MovieTable :movies="filteredMovies" />
-    </main>
-  </div>
+    </n-card>
 </template>
 
 <script lang="ts" setup>
@@ -43,7 +41,7 @@ import type {Movie, Stats} from "@/types";
 import {movieApi} from "@/lib/api";
 
 // 获取主题状态
-const { isDark, themeVars } = useTheme();
+const { isDark} = useTheme();
 
 // 所有电影数据
 const allMovies = ref<Movie[]>([]);
@@ -280,27 +278,6 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
-/* 表格悬停效果 */
-.hover-effect:hover {
-  background-color: rgba(59, 130, 246, 0.05);
-}
-/* 确保图表容器高度 */
-.chart-container {
-  min-height: 300px;
-}
-/* 卡片悬停效果 */
-.stat-card {
-  transition:
-      transform 0.2s,
-      box-shadow 0.2s;
-}
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow:
-      0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-/* 确保页面最小高度 */
 .min-h-screen {
   min-height: 1024px;
 }

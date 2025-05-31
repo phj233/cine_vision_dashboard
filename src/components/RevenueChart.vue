@@ -14,13 +14,12 @@
           </n-button>
         </n-popselect>
 
-        <n-tooltip trigger="hover" placement="top">
+        <n-tooltip trigger="hover" placement="top" content="显示电影年度总票房和平均票房变化趋势">
           <template #trigger>
             <n-icon size="18" class="text-blue-500">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
             </n-icon>
           </template>
-          显示电影年度总票房和平均票房变化趋势
         </n-tooltip>
       </n-space>
     </template>
@@ -34,7 +33,7 @@
           显示全部数据
         </n-button>
       </div>
-      <v-chart v-else class="w-full h-full" :option="revenueChartOption" autoresize />
+      <v-chart v-else class="w-full h-full" :option="revenueChartOption" :autoresize="true"></v-chart>
     </div>
   </n-card>
 </template>
@@ -44,7 +43,7 @@ import {computed, ref, watch} from 'vue';
 import {NButton, NCard, NIcon, NPopselect, NSpace, NTooltip} from 'naive-ui';
 import {use} from 'echarts/core';
 import {CanvasRenderer} from 'echarts/renderers';
-import {LineChart} from 'echarts/charts';
+import {BarChart, LineChart} from 'echarts/charts';
 import {
   DataZoomComponent,
   GridComponent,
@@ -55,10 +54,13 @@ import {
   TooltipComponent,
 } from 'echarts/components';
 import VChart from 'vue-echarts';
+import {useTheme} from '@/composables/useTheme';
+import {getChartTheme} from '@/lib/theme';
 
 // 注册 ECharts 组件
 use([
   CanvasRenderer,
+  BarChart,
   LineChart,
   TitleComponent,
   TooltipComponent,
@@ -68,6 +70,14 @@ use([
   MarkLineComponent,
   MarkPointComponent
 ]);
+
+// 获取主题状态
+const { isDark } = useTheme();
+
+// 应用主题
+const getEchartTheme = computed(() => {
+  return getChartTheme(isDark.value);
+});
 
 // 定义Props
 const props = defineProps<{
@@ -175,6 +185,7 @@ const revenueChartOption = computed(() => {
   const zoomStart = years.length <= 15 ? 0 : Math.max(0, 100 - (1500 / years.length));
 
   return {
+    ...getEchartTheme.value,
     tooltip: {
       trigger: "axis",
       axisPointer: {

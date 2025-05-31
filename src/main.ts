@@ -1,7 +1,6 @@
 import {createApp} from 'vue'
 import './style.css'
 import './assets/theme.css'
-import './lib/darkTheme.css'
 import App from './App.vue'
 import {router} from './router'
 import {createPinia} from 'pinia'

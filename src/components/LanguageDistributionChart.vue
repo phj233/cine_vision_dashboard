@@ -1,8 +1,8 @@
 <template>
-  <div class="chart-container">
-    <n-card title="电影语言分布" class="chart-card">
+  <div>
+    <n-card title="电影语言分布">
       <n-space vertical>
-        <n-space class="filter-container">
+        <n-space>
           <n-select
             v-model:value="minMovies"
             :options="minMoviesOptions"
@@ -23,19 +23,19 @@
         </n-space>
 
         <div>
-          <div v-if="loading" class="loading-container">
+          <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-spin size="large" />
           </div>
-          <div v-else-if="error" class="error-container">
+          <div v-else-if="error" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-alert type="error" :title="error" />
           </div>
-          <div v-else-if="!chartData || chartData.length === 0" class="empty-container">
+          <div v-else-if="!chartData || chartData.length === 0" style="display: flex; justify-content: center; align-items: center; height: 300px;">
             <n-empty description="暂无数据" />
           </div>
-          <div v-else class="chart-wrapper">
-            <v-chart class="chart" :option="chartOption" autoresize />
+          <div v-else>
+            <v-chart style="height: 400px; width: 100%;" :option="chartOption" :autoresize="true"></v-chart>
 
-            <div class="data-table-container">
+            <div style="margin-top: 1.5rem;">
               <n-data-table
                 size="small"
                 :columns="columns"
@@ -59,23 +59,28 @@ import {NAlert, NButton, NCard, NDataTable, NEmpty, NSelect, NSpace, NSpin} from
 import {use} from "echarts/core";
 import {CanvasRenderer} from "echarts/renderers";
 import {PieChart} from "echarts/charts";
-import {LegendComponent, TitleComponent, ToolboxComponent, TooltipComponent} from "echarts/components";
+import {LegendComponent, TitleComponent, TooltipComponent} from "echarts/components";
 import VChart from "vue-echarts";
 import {useTheme} from '@/composables/useTheme';
 import {visualizationApi} from '@/lib/api';
+import {getChartTheme} from '@/lib/theme';
 
 // 注册 ECharts 组件
 use([
   CanvasRenderer,
   PieChart,
-  TooltipComponent,
-  LegendComponent,
   TitleComponent,
-  ToolboxComponent
+  TooltipComponent,
+  LegendComponent
 ]);
 
-// 获取主题
+// 获取主题状态
 const { isDark } = useTheme();
+
+// 应用主题
+const getEchartTheme = computed(() => {
+  return getChartTheme(isDark.value);
+});
 
 // 加载状态和错误信息
 const loading = ref(false);
@@ -153,10 +158,14 @@ const columns = computed<DataTableColumns>(() => [
 const chartOption = computed(() => {
   if (!chartData.value || chartData.value.length === 0) {
     return {
+      ...getEchartTheme.value,
       title: {
         text: '暂无数据',
+        left: 'center',
+        top: 'center',
         textStyle: {
-          color: isDark.value ? '#eee' : '#333',
+          fontSize: 16,
+          color: isDark.value ? '#eee' : '#333'
         }
       }
     };
@@ -183,7 +192,7 @@ const chartOption = computed(() => {
   }
 
   return {
-    backgroundColor: 'transparent',
+    ...getEchartTheme.value,
     title: {
       text: '电影语言分布',
       textStyle: {
@@ -306,43 +315,3 @@ const fetchData = async () => {
 // 组件挂载时加载数据
 onMounted(fetchData);
 </script>
-
-<style scoped>
-.chart-container {
-  margin-bottom: 1.5rem;
-}
-
-.chart-card {
-  border-radius: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.chart-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.filter-container {
-  margin-bottom: 1rem;
-}
-
-.loading-container, .error-container, .empty-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-}
-
-.chart-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.chart {
-  height: 400px;
-  width: 100%;
-}
-
-.data-table-container {
-  margin-top: 1.5rem;
-}
-</style>

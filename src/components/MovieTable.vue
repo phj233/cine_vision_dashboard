@@ -62,7 +62,7 @@ import {useTheme} from '@/composables/useTheme';
 import {Icon} from '@iconify/vue';
 
 // 获取主题变量
-const { themeVars, isDark } = useTheme();
+const {isDark} = useTheme();
 
 // 定义Props
 const props = defineProps<{
@@ -139,6 +139,11 @@ const formattedMovies = computed(() => {
       if (!formatted.imdb_id.startsWith('tt')) {
         formatted.imdb_id = `tt${formatted.imdb_id}`;
       }
+    }
+
+    // 确保release_date字段存在
+    if (!formatted.hasOwnProperty('release_date')) {
+      formatted.release_date = '';
     }
 
     return formatted;
@@ -248,8 +253,9 @@ watch(() => props.movies, (newMovies) => {
 
     // 检查数据字段是否符合预期
     const sample = newMovies[0];
-    const expectedFields = ['id', 'title', 'genres', 'release_date', 'vote_average',
+    const expectedFields = ['id', 'title', 'genres', 'vote_average',
                            'runtime', 'production_countries', 'revenue', 'imdb_id'];
+    // release_date是可选字段，从必检查字段中移除
 
     const missingFields = expectedFields.filter(field => !sample.hasOwnProperty(field));
     if (missingFields.length > 0) {
@@ -367,8 +373,20 @@ const columns = computed<DataTableColumns>(() => [
     sorter: 'default',
     sortOrder: 'descend',
     render(row) {
-      const date = row.release_date ? new Date(row.release_date) : null;
-      return date ? date.getFullYear() + '-' + (date.getMonth() + 1).toString().padStart(2, '0') + '-' + date.getDate().toString().padStart(2, '0') : '未知';
+      // 如果release_date不存在或为空，直接返回"未知"
+      if (!row.release_date) return '未知';
+      
+      try {
+        const date = new Date(row.release_date);
+        // 检查日期是否有效
+        if (isNaN(date.getTime())) return '未知';
+        
+        return date.getFullYear() + '-' + 
+              (date.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+              date.getDate().toString().padStart(2, '0');
+      } catch (e) {
+        return '未知';
+      }
     }
   },
   {
@@ -379,7 +397,7 @@ const columns = computed<DataTableColumns>(() => [
       return Number(rowA.vote_average) - Number(rowB.vote_average);
     },
     render(row) {
-      const rating = parseFloat(row.vote_average);
+      const rating = parseFloat(String(row.vote_average || '0'));
       return h(
         'div',
         {
@@ -501,15 +519,6 @@ const columns = computed<DataTableColumns>(() => [
 }
 .mb-4 {
   margin-bottom: 1rem;
-}
-.flex {
-  display: flex;
-}
-.flex-col {
-  flex-direction: column;
-}
-.items-center {
-  align-items: center;
 }
 .movie-table-card {
   transition: all 0.3s ease;
