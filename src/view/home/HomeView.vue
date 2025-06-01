@@ -30,7 +30,6 @@
 
 <script lang="ts" setup>
 import {onMounted, ref} from 'vue';
-import {useTheme} from '@/composables/useTheme';
 import StatCards from "@/components/StatCards.vue";
 import ChartSection from "@/components/ChartSection.vue";
 import WorldMapChart from "@/components/WorldMapChart.vue";
@@ -39,9 +38,6 @@ import MiniCharts from "@/components/MiniCharts.vue";
 import RevenueChart from "@/components/RevenueChart.vue";
 import type {Movie, Stats} from "@/types";
 import {movieApi} from "@/lib/api";
-
-// 获取主题状态
-const { isDark} = useTheme();
 
 // 所有电影数据
 const allMovies = ref<Movie[]>([]);

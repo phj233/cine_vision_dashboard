@@ -152,14 +152,10 @@
 import {computed, h, onMounted, ref} from 'vue';
 import type {DataTableColumns} from 'naive-ui';
 import {NAlert, NButton, NCard, NDataTable, NEmpty, NGi, NGrid, NRate, NSelect, NSpace, NSpin} from 'naive-ui';
-import {useTheme} from '@/composables/useTheme';
 import LanguageDistributionChart from '@/components/LanguageDistributionChart.vue';
 import DirectorAnalysisChart from '@/components/DirectorAnalysisChart.vue';
 import BudgetRevenueChart from '@/components/BudgetRevenueChart.vue';
 import {visualizationApi} from '@/lib/api';
-
-// 获取主题状态
-const { isDark } = useTheme();
 
 // 定义数据类型
 interface CrossRolePersonData {
@@ -260,7 +256,7 @@ const crossRoleColumns = computed<DataTableColumns>(() => [
   {
     title: '平均评分',
     key: 'avg_rating',
-    width: 120,
+    width: 180,
     render(row: any) {
       const ratingValue = parseFloat(String(row?.avg_rating || '0')) / 2;
       const ratingText = row?.avg_rating?.toString() || '0';
@@ -294,7 +290,7 @@ const cinematographerColumns = computed<DataTableColumns>(() => [
   {
     title: '摄影指导',
     key: 'cinematographer_name',
-    width: 150,
+    width: 120,
     render(row: any) {
       return row?.cinematographer_name || '未知';
     }
@@ -312,7 +308,7 @@ const cinematographerColumns = computed<DataTableColumns>(() => [
   {
     title: '平均评分',
     key: 'avg_rating',
-    width: 120,
+    width: 160,
     render(row: any) {
       const ratingValue = parseFloat(String(row?.avg_rating || '0')) / 2;
       const ratingText = row?.avg_rating?.toString() || '0';
@@ -346,7 +342,7 @@ const composerColumns = computed<DataTableColumns>(() => [
   {
     title: '音乐作曲家',
     key: 'composer_name',
-    width: 150,
+    width: 120,
     render(row: any) {
       return row?.composer_name || '未知';
     }
@@ -364,7 +360,7 @@ const composerColumns = computed<DataTableColumns>(() => [
   {
     title: '平均评分',
     key: 'avg_rating',
-    width: 120,
+    width: 160,
     render(row: any) {
       const ratingValue = parseFloat(String(row?.avg_rating || '0')) / 2;
       const ratingText = row?.avg_rating?.toString() || '0';

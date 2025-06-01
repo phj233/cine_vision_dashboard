@@ -4,6 +4,8 @@ import {darkTheme, NConfigProvider, NLayout, NLayoutContent, NMessageProvider} f
 import {onMounted, provide, ref, watch} from 'vue';
 import {darkThemeOverrides, lightThemeOverrides} from '@/lib/theme';
 
+console.log('当前模式:', import.meta.env.MODE);
+console.log('当前API:', import.meta.env.VITE_API_BASE_URL)
 // 创建主题状态
 const theme = ref<null | typeof darkTheme>(null);
 const themeOverrides = ref(lightThemeOverrides);

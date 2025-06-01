@@ -10,9 +10,6 @@
             action="http://127.0.0.1:3000/api/v1/import"
             :max="1"
             :show-file-list="true"
-            @before-upload="handleBeforeUpload"
-            @finish="handleUploadFinish"
-            @error="handleUploadError"
             :disabled="uploading"
         >
           <n-upload-dragger>
@@ -142,38 +139,6 @@ const guideSteps = [
     description: '点击开始导入按钮，等待处理完成'
   }
 ];
-
-// 上传前验证
-const handleBeforeUpload = ({ file }: { file: File }) => {
-  if (!file.name.endsWith('.csv')) {
-    message.error('仅支持 CSV 格式文件');
-    return false;
-  }
-
-  if (file.size > 2 * 1024 * 1024 * 1024) {
-    message.error('文件大小不能超过 2GB');
-    return false;
-  }
-
-  uploading.value = true;
-  progress.value = 0;
-  uploadError.value = '';
-  return true;
-};
-
-// 上传完成处理
-const handleUploadFinish = ({ file}: { file: File; event?: ProgressEvent }) => {
-  uploading.value = false;
-  message.success(`${file.name} 上传成功`);
-  // 这里可以添加数据导入后的处理逻辑
-};
-
-// 错误处理
-const handleUploadError = (error: Error) => {
-  uploading.value = false;
-  uploadError.value = `上传失败: ${error.message}`;
-  message.error('文件上传失败，请检查文件格式后重试');
-};
 
 // 重新上传处理
 const handleRetry = () => {

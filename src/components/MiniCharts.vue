@@ -53,9 +53,22 @@ const getEchartTheme = computed(() => {
   return getChartTheme(isDark.value);
 });
 
-// 数据存储
-const budgetData = ref([]);
-const runtimeData = ref([]);
+interface BudgetData {
+  budget_bucket: string;
+  budget_bucket_end: string;
+  avg_revenue: string;
+  avg_roi: string;
+  movie_count: number;
+}
+
+interface RuntimeData {
+  bucket_start: string;
+  bucket_end: string;
+  movie_count: number;
+}
+
+const budgetData = ref<BudgetData[]>([]);
+const runtimeData = ref<RuntimeData[]>([]);
 
 // 获取预算-票房数据
 const fetchBudgetRevenueData = async () => {

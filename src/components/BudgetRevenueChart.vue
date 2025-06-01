@@ -4,27 +4,27 @@
       <n-space vertical>
         <n-space>
           <n-date-picker
-            v-model:value="yearRange"
-            type="daterange"
-            clearable
-            size="small"
-            :is-date-disabled="disableFutureDate"
-            :actions="['clear', 'confirm']"
-            style="width: 240px"
+              v-model:value="yearRange"
+              type="daterange"
+              clearable
+              size="small"
+              :is-date-disabled="disableFutureDate"
+              :actions="['clear', 'confirm']"
+              style="width: 240px"
           />
           <n-select
-            v-model:value="minVotes"
-            :options="votesOptions"
-            placeholder="最少评分数"
-            size="small"
-            style="width: 120px"
+              v-model:value="minVotes"
+              :options="votesOptions"
+              placeholder="最少评分数"
+              size="small"
+              style="width: 120px"
           />
           <n-select
-            v-model:value="bucketSize"
-            :options="bucketOptions"
-            placeholder="预算区间"
-            size="small"
-            style="width: 120px"
+              v-model:value="bucketSize"
+              :options="bucketOptions"
+              placeholder="预算区间"
+              size="small"
+              style="width: 120px"
           />
           <n-button size="small" type="primary" @click="fetchData">
             更新数据
@@ -33,13 +33,14 @@
 
         <div>
           <div v-if="loading" style="display: flex; justify-content: center; align-items: center; height: 300px;">
-            <n-spin size="large" />
+            <n-spin size="large"/>
           </div>
           <div v-else-if="error" style="display: flex; justify-content: center; align-items: center; height: 300px;">
-            <n-alert type="error" :title="error" />
+            <n-alert type="error" :title="error"/>
           </div>
-          <div v-else-if="!chartData.buckets || chartData.buckets.length === 0" style="display: flex; justify-content: center; align-items: center; height: 300px;">
-            <n-empty description="暂无数据" />
+          <div v-else-if="!chartData.buckets || chartData.buckets.length === 0"
+               style="display: flex; justify-content: center; align-items: center; height: 300px;">
+            <n-empty description="暂无数据"/>
           </div>
           <div v-else>
             <v-chart style="height: 450px; width: 100%;" :option="chartOption" :autoresize="true"></v-chart>
@@ -49,9 +50,9 @@
             <n-grid :cols="4" :x-gap="12">
               <n-gi>
                 <n-statistic
-                  label="平均投资回报率"
-                  :value="parseFloat(String(chartData.overall?.avg_roi || 0))"
-                  :precision="2"
+                    label="平均投资回报率"
+                    :value="parseFloat(String(chartData.overall?.avg_roi || 0))"
+                    :precision="2"
                 >
                   <template #suffix>
                     <span>倍</span>
@@ -60,20 +61,20 @@
               </n-gi>
               <n-gi>
                 <n-statistic
-                  label="平均预算"
-                  :value="formatCurrency(chartData.overall?.avg_budget)"
+                    label="平均预算"
+                    :value="formatCurrency(chartData.overall?.avg_budget)"
                 />
               </n-gi>
               <n-gi>
                 <n-statistic
-                  label="平均票房"
-                  :value="formatCurrency(chartData.overall?.avg_revenue)"
+                    label="平均票房"
+                    :value="formatCurrency(chartData.overall?.avg_revenue)"
                 />
               </n-gi>
               <n-gi>
                 <n-statistic
-                  label="样本电影数量"
-                  :value="chartData.overall?.total_movies || 0"
+                    label="样本电影数量"
+                    :value="chartData.overall?.total_movies || 0"
                 />
               </n-gi>
             </n-grid>
@@ -81,12 +82,12 @@
             <n-divider>详细数据</n-divider>
 
             <n-data-table
-              size="small"
-              :columns="columns"
-              :data="chartData.buckets"
-              :pagination="pagination"
-              :bordered="false"
-              striped
+                size="small"
+                :columns="columns"
+                :data="chartData.buckets"
+                :pagination="pagination"
+                :bordered="false"
+                striped
             />
           </div>
         </div>
@@ -96,9 +97,9 @@
 </template>
 
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue';
-import type {DataTableColumns} from 'naive-ui';
+import {computed, h, onMounted, ref} from 'vue';
 import {
+  DataTableColumns,
   NAlert,
   NButton,
   NCard,
@@ -146,7 +147,7 @@ use([
 ]);
 
 // 获取主题
-const { isDark } = useTheme();
+const {isDark} = useTheme();
 
 // 加载状态和错误信息
 const loading = ref(false);
@@ -173,17 +174,17 @@ const bucketSize = ref(10000000);
 
 // 选项配置
 const votesOptions = [
-  { label: '最少 10 票', value: 10 },
-  { label: '最少 50 票', value: 50 },
-  { label: '最少 100 票', value: 100 },
-  { label: '最少 200 票', value: 200 }
+  {label: '最少 10 票', value: 10},
+  {label: '最少 50 票', value: 50},
+  {label: '最少 100 票', value: 100},
+  {label: '最少 200 票', value: 200}
 ];
 
 const bucketOptions = [
-  { label: '1百万', value: 1000000 },
-  { label: '5百万', value: 5000000 },
-  { label: '1千万', value: 10000000 },
-  { label: '2千万', value: 20000000 }
+  {label: '1百万', value: 1000000},
+  {label: '5百万', value: 5000000},
+  {label: '1千万', value: 10000000},
+  {label: '2千万', value: 20000000}
 ];
 
 // 禁用未来日期
@@ -200,11 +201,9 @@ const pagination = ref({
 });
 
 // 格式化货币数值
-const formatCurrency = (value: string | number | undefined) => {
-  if (!value) return '¥0';
-
+const formatCurrency = (value: string | number | null | undefined): string => {
+  if (value === null || value === undefined) return '¥0';
   const number = typeof value === 'string' ? parseFloat(value) : value;
-
   if (number >= 1000000000) {
     return `¥${(number / 1000000000).toFixed(2)}B`;
   } else if (number >= 1000000) {
@@ -217,41 +216,47 @@ const formatCurrency = (value: string | number | undefined) => {
 };
 
 // 数据表格列配置
-const columns = computed<DataTableColumns>(() => [
-  {
-    title: '预算区间',
-    key: 'budget_range',
-    width: 180,
-    render(row) {
-      return `${formatCurrency(row?.budget_bucket)} - ${formatCurrency(row?.budget_bucket_end)}`;
+const columns = computed(() => {
+  const tableColumns: DataTableColumns = [
+    {
+      title: '预算区间',
+      key: 'budget_range',
+      width: 180,
+      render(row) {
+        const budget = Number(row?.budget_bucket || 0);
+        return `${formatCurrency(budget)} - ${formatCurrency(budget + bucketSize.value)}`;
+      }
+    },
+    {
+      title: '电影数量',
+      key: 'movie_count',
+      width: 100,
+      render(row) {
+        const movie_count = row?.movie_count ?? 'N/A';
+        return `${movie_count}`
+      }
+    },
+    {
+      title: '平均票房',
+      key: 'avg_revenue',
+      width: 130,
+      render(row) {
+        const avg_revenue = Number(row?.avg_revenue || 0);
+        return `${avg_revenue}`
+      }
+    },
+    {
+      title: '平均回报率',
+      key: 'avg_roi',
+      width: 120,
+      render(row) {
+        const roi = parseFloat(String(row?.avg_roi || '0'));
+        return h('span', {}, `${roi.toFixed(2)}倍`);
+      }
     }
-  },
-  {
-    title: '电影数量',
-    key: 'movie_count',
-    width: 100,
-    render(row) {
-      return row?.movie_count || 0;
-    }
-  },
-  {
-    title: '平均票房',
-    key: 'avg_revenue',
-    width: 130,
-    render(row) {
-      return formatCurrency(row?.avg_revenue);
-    }
-  },
-  {
-    title: '平均回报率',
-    key: 'avg_roi',
-    width: 120,
-    render(row) {
-      const roi = parseFloat(row?.avg_roi || '0');
-      return `${roi.toFixed(2)}倍`;
-    }
-  }
-]);
+  ];
+  return tableColumns;
+});
 
 // 图表配置
 const chartOption = computed(() => {
@@ -323,19 +328,28 @@ const chartOption = computed(() => {
     },
     tooltip: {
       trigger: 'item',
-      formatter: function(params: any) {
+      formatter: function (params: any) {
         if (params.seriesIndex === 0) {
           return `预算: ${formatCurrency(params.value[0] * 1000000)}<br />` +
-            `平均票房: ${formatCurrency(params.value[1] * 1000000)}<br />` +
-            `电影数量: ${params.value[2]}`;
+              `平均票房: ${formatCurrency(params.value[1] * 1000000)}<br />` +
+              `电影数量: ${params.value[2]}`;
         } else {
           let roiValue;
           switch (params.seriesIndex) {
-            case 1: roiValue = "收支平衡"; break;
-            case 2: roiValue = "2倍回报"; break;
-            case 3: roiValue = "5倍回报"; break;
-            case 4: roiValue = "10倍回报"; break;
-            default: roiValue = "";
+            case 1:
+              roiValue = "收支平衡";
+              break;
+            case 2:
+              roiValue = "2倍回报";
+              break;
+            case 3:
+              roiValue = "5倍回报";
+              break;
+            case 4:
+              roiValue = "10倍回报";
+              break;
+            default:
+              roiValue = "";
           }
           return roiValue;
         }
@@ -419,7 +433,7 @@ const chartOption = computed(() => {
           }
         },
         itemStyle: {
-          color: function(params: any) {
+          color: function (params: any) {
             // 根据回报率计算颜色
             const roi = params.data[1] / params.data[0];
             if (roi < 1) return '#ee6666'; // 亏损
@@ -554,7 +568,7 @@ const getYearFromValue = (value: any): number => {
 const fetchData = async () => {
   loading.value = true;
   error.value = '';
-  chartData.value = { buckets: [], overall: null }; // 清空现有数据
+  chartData.value = {buckets: [], overall: null}; // 清空现有数据
 
   // 处理yearRange可能为null的情况（用户清除了日期选择）
   let startYear = 1990;
@@ -567,10 +581,10 @@ const fetchData = async () => {
 
   try {
     const response = await visualizationApi.getBudgetRevenueAnalysis(
-      startYear,
-      endYear,
-      minVotes.value,
-      bucketSize.value
+        startYear,
+        endYear,
+        minVotes.value,
+        bucketSize.value
     );
 
     if (response && response.data) {
@@ -581,17 +595,17 @@ const fetchData = async () => {
           overall: response.data.overall || null
         };
       } else {
-        chartData.value = { buckets: [], overall: null };
+        chartData.value = {buckets: [], overall: null};
         error.value = '返回数据格式不正确，缺少buckets数组';
       }
     } else {
-      chartData.value = { buckets: [], overall: null };
+      chartData.value = {buckets: [], overall: null};
       error.value = '返回数据格式不正确';
     }
     pagination.value.page = 1;
   } catch (err: any) {
     console.error('获取预算与票房关系数据失败:', err);
-    chartData.value = { buckets: [], overall: null };
+    chartData.value = {buckets: [], overall: null};
     error.value = err?.message || '获取数据失败，请稍后重试';
   } finally {
     loading.value = false;
