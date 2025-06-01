@@ -1,34 +1,15 @@
-import {createDiscreteApi, darkTheme} from 'naive-ui';
-import {computed} from 'vue';
-import {darkThemeOverrides, lightThemeOverrides} from '@/lib/theme';
+import {createDiscreteApi} from 'naive-ui';
 
 // 获取主题状态
-const getThemeConfig = () => {
-    // 从localStorage获取当前主题偏好
-    const isDarkMode = localStorage.getItem('theme-preference') === 'dark';
-
-    return {
-        theme: isDarkMode ? darkTheme : null,
-        themeOverrides: isDarkMode ? darkThemeOverrides : lightThemeOverrides,
-    };
-};
-
-// 获取动态配置
-const getDiscreteApiOptions = () => {
-    const { theme, themeOverrides } = getThemeConfig();
-
-    return {
-        configProviderProps: {
-            theme,
-            themeOverrides
-        }
-    };
-};
-
 // 创建离散API，可以在组件外使用
 const { message, notification, dialog, loadingBar } = createDiscreteApi(
     ['message', 'notification', 'dialog', 'loadingBar'],
-    computed(getDiscreteApiOptions)
+    {
+        configProviderProps: {
+            theme: null,
+            themeOverrides: {}
+        }
+    }
 );
 
 /**

@@ -1,17 +1,30 @@
-import {GlobalThemeOverrides} from 'naive-ui'
+import type {GlobalThemeOverrides} from 'naive-ui'
 
 /**
  * 亮色主题覆盖配置
  */
 export const lightThemeOverrides: GlobalThemeOverrides = {
     common: {
-        primaryColor: '#3B82F6',
-        primaryColorHover: '#2563EB',
-        primaryColorPressed: '#1D4ED8',
-        infoColor: '#60A5FA',
-        successColor: '#10B981',
-        warningColor: '#F59E0B',
-        errorColor: '#EF4444',
+        primaryColor: '#2080f0',
+        primaryColorHover: '#4098fc',
+        primaryColorPressed: '#1060d9',
+        primaryColorSuppl: '#4098fc',
+        infoColor: '#2080f0',
+        infoColorHover: '#4098fc',
+        infoColorPressed: '#1060d9',
+        infoColorSuppl: '#4098fc',
+        successColor: '#18a058',
+        successColorHover: '#36ad6a',
+        successColorPressed: '#0c7a43',
+        successColorSuppl: '#36ad6a',
+        warningColor: '#f0a020',
+        warningColorHover: '#fcb040',
+        warningColorPressed: '#d99010',
+        warningColorSuppl: '#fcb040',
+        errorColor: '#d03050',
+        errorColorHover: '#de576d',
+        errorColorPressed: '#ab1f3f',
+        errorColorSuppl: '#de576d'
     },
     Card: {
         borderRadius: '8px',
@@ -38,13 +51,26 @@ export const lightThemeOverrides: GlobalThemeOverrides = {
  */
 export const darkThemeOverrides: GlobalThemeOverrides = {
     common: {
-        primaryColor: '#60A5FA',
-        primaryColorHover: '#93C5FD',
-        primaryColorPressed: '#3B82F6',
-        infoColor: '#60A5FA',
-        successColor: '#34D399',
-        warningColor: '#FBBF24',
-        errorColor: '#F87171',
+        primaryColor: '#2080f0',
+        primaryColorHover: '#4098fc',
+        primaryColorPressed: '#1060d9',
+        primaryColorSuppl: '#4098fc',
+        infoColor: '#2080f0',
+        infoColorHover: '#4098fc',
+        infoColorPressed: '#1060d9',
+        infoColorSuppl: '#4098fc',
+        successColor: '#18a058',
+        successColorHover: '#36ad6a',
+        successColorPressed: '#0c7a43',
+        successColorSuppl: '#36ad6a',
+        warningColor: '#f0a020',
+        warningColorHover: '#fcb040',
+        warningColorPressed: '#d99010',
+        warningColorSuppl: '#fcb040',
+        errorColor: '#d03050',
+        errorColorHover: '#de576d',
+        errorColorPressed: '#ab1f3f',
+        errorColorSuppl: '#de576d'
     },
     Card: {
         colorEmbedded: 'rgba(30, 41, 59, 0.7)',

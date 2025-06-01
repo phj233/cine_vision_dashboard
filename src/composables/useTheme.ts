@@ -1,4 +1,5 @@
 import {computed, inject} from 'vue'
+import type {GlobalTheme} from 'naive-ui'
 import {darkTheme, useOsTheme} from 'naive-ui'
 
 export interface ThemeVars {
@@ -20,11 +21,11 @@ export interface ThemeVars {
  */
 export function useTheme() {
     // 通过注入获取应用当前的主题
-    const theme = inject('theme', null)
+    const theme = inject<GlobalTheme | null>('theme', null)
     const osTheme = useOsTheme()
 
     // 判断当前是否是暗色主题
-    const isDark = computed(() => theme?.value === darkTheme)
+    const isDark = computed(() => theme === darkTheme)
 
     // 定义各种主题相关的颜色变量
     const themeVars = computed<ThemeVars>(() => {
