@@ -1,159 +1,235 @@
 <template>
-  <n-card>
-    <main class="container mx-auto px-6 py-8">
-      <h1 class="text-2xl font-bold mb-6">数据导入工具</h1>
-      <!-- 上传区域 -->
-      <n-card>
-        <h1 class="text-2xl font-bold mb-6">导入电影数据</h1>
+  <n-card :bordered="false" size="large">
+    <n-space vertical align="center" style="width: 100%; max-width: 600px; margin: 2rem auto;">
 
-        <n-upload
-            action="http://127.0.0.1:3000/api/v1/import"
-            :max="1"
-            :show-file-list="true"
-            :disabled="uploading"
-        >
-          <n-upload-dragger>
-            <div class="py-12 text-center">
-              <n-icon size="48" class="mb-4" color="#2080f0">
-                <cloud-upload-outline />
-              </n-icon>
-              <p class="text-lg font-medium">
-                {{ uploading ? '正在上传中...' : '点击或拖拽 CSV 文件到此区域' }}
-              </p>
-              <p class="mt-2 text-sm" style="color: #666;">
-                支持单个文件上传，文件大小不超过 2GB
-              </p>
-              <n-progress
-                  v-if="uploading"
-                  class="mt-4 w-64 mx-auto"
-                  type="line"
-                  :percentage="progress"
-                  :indicator-placement="'inside'"
-              />
-            </div>
-          </n-upload-dragger>
-        </n-upload>
+      <n-alert title="CSV 文件格式要求" type="info" :show-icon="true" style="margin-bottom: 1.5rem; width: 100%;">
+        <n-text>
+          请确保您的 CSV 文件第一行为列标题。为获得最佳数据导入效果，建议您尽可能完整地提供以下列出的所有字段。
+        </n-text>
+        <n-divider style="margin-top: 0.75rem; margin-bottom: 0.75rem;"/>
+        <n-space :size="[8, 8]" wrap>
+          <n-tag v-for="fieldName in expectedFieldNames" :key="fieldName" type="primary" round size="small">
+            {{ fieldName }}
+          </n-tag>
+        </n-space>
+      </n-alert>
 
-        <n-alert v-if="uploadError" type="error" class="mt-4">
-          {{ uploadError }}
-          <div class="mt-2">
-            <n-button type="primary" size="small" @click="handleRetry">
-              <template #icon>
-                <n-icon><reload-outline /></n-icon>
-              </template>
-              重新上传
-            </n-button>
-          </div>
-        </n-alert>
-      </n-card>
+      <n-upload
+        :action="uploadUrl"
+        accept=".csv, text/csv"
+        :max="1"
+        :custom-request="handleCustomUpload"
+        @change="handleFileChange"
+        :disabled="uploading"
+        v-model:file-list="fileList"
+        :show-file-list="true"
+        list-type="text"
+        style="width: 100%;"
+      >
+        <n-button type="primary" :loading="uploading" :disabled="uploading" block>
+          <template #icon>
+            <n-icon>
+              <icon-upload/>
+            </n-icon>
+          </template>
+          选择 CSV 文件并上传
+        </n-button>
+      </n-upload>
 
-      <!-- 示例数据预览图 -->
-      <n-card class="mt-4">
-        <template #header>
-          <div class="text-xl font-bold">CSV 文件格式示例</div>
-        </template>
-        <div class="bg-white rounded-lg overflow-hidden">
-          <img
-              src="https://readdy.ai/api/search-image?query=A%20clean%2C%20professional%20screenshot%20of%20a%20CSV%20file%20open%20in%20Excel%20or%20Google%20Sheets%2C%20showing%20sample%20movie%20data%20with%20columns%20for%20movie%20title%2C%20director%2C%20release%20year%2C%20and%20genre.%20The%20spreadsheet%20has%20a%20light%20grid%20pattern%20with%20clear%20column%20headers%20and%20sample%20data%20rows.%20The%20image%20is%20well-lit%20with%20a%20clean%20white%20background%20and%20professional%20appearance.&width=800&height=400&seq=1&orientation=landscape"
-              alt="CSV文件格式示例"
-              class="w-full h-auto object-cover object-top"
-          />
-        </div>
-        <div class="mt-3 text-sm" style="color: #666;">
-          CSV 文件应包含标题行，并确保数据格式与系统要求一致。
-        </div>
-      </n-card>
+      <div v-if="uploading && uploadPercent > 0" style="width: 100%; margin-top: 1rem;">
+        <n-progress
+          type="line"
+          status="info"
+          :percentage="uploadPercent"
+          :indicator-placement="'inside'"
+          processing
+        />
+      </div>
 
-      <!-- 导入指南 -->
-      <n-card class="mt-4">
-        <template #header>
-          <div class="text-xl font-bold">CSV 文件格式要求</div>
-        </template>
-        <n-grid :cols="3" :x-gap="12" responsive="screen">
-          <n-gi v-for="(item, index) in guideSteps" :key="index">
-            <n-thing>
-              <template #avatar>
-                <n-avatar round :size="48" :color="avatarColor">
-                  <n-icon :component="item.icon" />
-                </n-avatar>
-              </template>
-              <template #header>
-                <div class="font-medium">{{ item.title }}</div>
-              </template>
-              <template #description>
-                <div style="color: #666; font-size: 14px;">{{ item.description }}</div>
-              </template>
-            </n-thing>
-          </n-gi>
-        </n-grid>
-      </n-card>
-    </main>
+      <n-text v-if="uploadMessage" :type="uploadStatus"
+              style="margin-top: 1rem; font-weight: bold; text-align: center;">
+        {{ uploadMessage }}
+      </n-text>
+      <n-text v-if="longProcessMessage" type="warning" style="font-size: 0.85rem; text-align: center;">
+        {{ longProcessMessage }}
+      </n-text>
+
+
+      <n-collapse-transition :show="!!uploadResponseDetails && !uploading">
+        <n-card title="导入详情" size="small" embedded style="margin-top: 1rem; width: 100%;">
+          <n-descriptions label-placement="left" bordered :column="1">
+            <n-descriptions-item v-for="(value, key) in uploadResponseDetails" :key="key" :label="String(key)">
+              {{ value }}
+            </n-descriptions-item>
+          </n-descriptions>
+        </n-card>
+      </n-collapse-transition>
+    </n-space>
   </n-card>
 </template>
 
-<script lang="ts" setup>
-import {computed, ref} from 'vue';
-import {CheckmarkCircleOutline, CloudUploadOutline, DocumentTextOutline, ReloadOutline} from '@vicons/ionicons5';
-import {useTheme} from '@/composables/useTheme';
+<script setup lang="ts">
+import {onBeforeUnmount, onMounted, ref} from 'vue';
 import {
   NAlert,
-  NAvatar,
   NButton,
   NCard,
-  NGi,
-  NGrid,
+  NCollapseTransition,
+  NDescriptions,
+  NDescriptionsItem,
+  NDivider,
   NIcon,
   NProgress,
-  NThing,
+  NSpace,
+  NTag,
+  NText,
   NUpload,
-  NUploadDragger,
+  type UploadCustomRequestOptions,
+  type UploadFileInfo,
   useMessage
 } from 'naive-ui';
+import {CloudUploadOutline as IconUpload} from '@vicons/ionicons5';
+import axios from 'axios';
+import {Movie} from "@/types.ts";
 
-const message = useMessage();
-const uploading = ref(false);
-const progress = ref(0);
-const uploadError = ref('');
-
-// 获取主题状态
-const { isDark } = useTheme();
-
-// 头像背景色
-const avatarColor = computed(() => isDark.value ? '#18a058' : '#d0f0dd');
-
-// 上传指南步骤
-const guideSteps = [
-  {
-    icon: DocumentTextOutline,
-    title: '文件格式',
-    description: '确保文件为CSV格式，包含正确的列标题'
-  },
-  {
-    icon: CloudUploadOutline,
-    title: '上传文件',
-    description: '拖拽文件到上传区域或点击选择文件按钮'
-  },
-  {
-    icon: CheckmarkCircleOutline,
-    title: '确认导入',
-    description: '点击开始导入按钮，等待处理完成'
-  }
+// 预期 CSV 字段列表 (用于前端提示)
+const expectedFieldNames: (keyof Movie)[] = [
+  'id', 'title', 'original_title', 'release_date', 'vote_average',
+  'vote_count', 'revenue', 'runtime', 'overview', 'tagline', 'genres',
+  'cast', 'directors', 'production_companies', 'production_countries',
+  'poster_path', 'budget', 'imdb_id', 'tmdb_id',
 ];
 
-// 重新上传处理
-const handleRetry = () => {
-  uploadError.value = '';
-  // 这里可以添加一些重置逻辑
-  message.info('请重新选择文件上传');
+// API 配置
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+console. log('UPLOAD: API_BASE_URL:', API_BASE_URL);
+const uploadUrl = `${API_BASE_URL}/api/v1/import`;
 
-  // 模拟点击上传区域
-  const uploadInput = document.querySelector('.n-upload input[type=file]');
-  if (uploadInput) {
-    (uploadInput as HTMLElement).click();
+// UI 状态
+const message = useMessage();
+const uploading = ref(false);
+const uploadPercent = ref(0);
+const uploadMessage = ref('');
+const longProcessMessage = ref('');
+const uploadStatus = ref<'success' | 'error' | 'info'>('info');
+const fileList = ref<UploadFileInfo[]>([]);
+const uploadResponseDetails = ref<Record<string, any> | null>(null);
+
+// 文件列表变化时清空旧消息和状态
+const handleFileChange = (data: { fileList: UploadFileInfo[] }) => {
+  if (data.fileList.length === 0 ||
+    (data.fileList.length > 0 && data.fileList[0].status !== 'uploading')) {
+    uploadMessage.value = '';
+    longProcessMessage.value = '';
+    uploadResponseDetails.value = null;
+    uploadPercent.value = 0;
+  }
+  fileList.value = data.fileList.slice(-1);
+};
+
+// 自定义上传逻辑
+const handleCustomUpload = async ({file, onFinish, onError, onProgress,}: UploadCustomRequestOptions) => {
+  uploading.value = true;
+  uploadPercent.value = 0;
+  uploadMessage.value = `开始上传 ${file.name}...`;
+  longProcessMessage.value = ''; // 初始化时清空
+  uploadStatus.value = 'info';
+  uploadResponseDetails.value = null;
+
+  const formData = new FormData();
+  formData.append('file', file.file as File, file.name);
+
+  let serverProcessingMessageSet = false; // 标记是否已显示服务器处理消息
+
+  try {
+    const response = await axios.post(uploadUrl, formData, {
+      headers: {
+        // Axios 会自动为 FormData 设置正确的 'Content-Type': 'multipart/form-data'
+      },
+      onUploadProgress: (progressEvent) => {
+        if (progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          uploadPercent.value = percent;
+          onProgress({percent}); // 更新 NUpload 内部进度
+          if (percent < 100) {
+            uploadMessage.value = `文件上传中: ${percent}%`;
+          } else if (percent === 100 && !serverProcessingMessageSet) {
+            // 文件字节传输完成
+            uploadMessage.value = '上传完成！服务器正在验证和处理数据...';
+            longProcessMessage.value = '此过程可能需要非常长的时间（例如几分钟到几十分钟），请勿关闭或刷新页面。';
+            serverProcessingMessageSet = true;
+          }
+        }
+      },
+      timeout: 1800000,
+    });
+
+    // 当 axios.post 的 promise resolve 时，表示后端已处理完毕并返回了 HTTP 响应
+    console.log('Upload response:', response.data);
+
+    if (response.data && response.data.success === true) {
+      message.success(response.data.message || '文件导入成功！');
+      uploadMessage.value = response.data.message || '文件导入成功！';
+      uploadStatus.value = 'success';
+      uploadResponseDetails.value = response.data.details || null;
+      onFinish();
+    } else {
+      const errorMsg = response.data?.message || '导入失败，服务器返回的响应表明操作未成功。';
+      message.error(errorMsg);
+      uploadMessage.value = errorMsg;
+      uploadStatus.value = 'error';
+      uploadResponseDetails.value = response.data?.details || null;
+      onError();
+    }
+  } catch (err: any) {
+    console.error('Upload error:', err);
+    let errorMsg = '文件上传或处理失败，请稍后重试或联系管理员。';
+    if (axios.isCancel(err)) {
+      errorMsg = '上传已取消。';
+    } else if (err.code === 'ECONNABORTED' || (err.message && err.message.toLowerCase().includes('timeout'))) {
+      errorMsg = '处理超时！服务器处理时间过长，未能及时响应。';
+      message.error(errorMsg);
+    } else if (err.response && err.response.data && err.response.data.message) {
+      errorMsg = err.response.data.message;
+      message.error(errorMsg);
+    } else if (err.message) {
+      errorMsg = err.message;
+      message.error(errorMsg);
+    } else {
+      message.error(errorMsg);
+    }
+    uploadMessage.value = errorMsg;
+    uploadStatus.value = 'error';
+    onError();
+  } finally {
+    uploading.value = false;
+    longProcessMessage.value = '';
+    uploadPercent.value = 0;
+    if (uploadStatus.value === 'success' || uploadStatus.value === 'error') {
+      setTimeout(() => {
+        if (fileList.value.length > 0 && fileList.value[0].status !== 'uploading') {
+          fileList.value = [];
+        }
+      }, 5000); // 5秒后清空文件列表，让用户看到文件名和状态
+    }
   }
 };
+// 防止在上传/处理过程中意外关闭页面
+const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+  if (uploading.value) {
+    event.preventDefault();
+    event.returnValue = '上传或处理数据中，请勿关闭或刷新页面。';
+  }
+}
+onMounted(() => {
+  window.addEventListener('beforeunload', handleBeforeUnload);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeunload', handleBeforeUnload);
+});
+
 </script>
 
 <style scoped>
-
 </style>
