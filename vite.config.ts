@@ -44,7 +44,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '') // 移除 /api 前缀，使请求变成 /v1/xxx
+        // rewrite: (path) => path.replace(/^\/api/, '') // 移除 /api 前缀，使请求变成 /v1/xxx
       }
     }
   }
