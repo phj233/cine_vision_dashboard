@@ -1,10 +1,10 @@
 <template>
-  <n-card title="数据概要" size="small">
+  <n-card title="数据概要" size="large">
     <n-grid :cols="1" :x-gap="12" :y-gap="12">
       <!-- 预算-票房对比 -->
       <n-gi :span="1">
         <n-statistic label="预算-票房对比">
-          <div class="h-50">
+          <div class="h-70">
             <v-chart class="w-full h-full" :option="budgetRevenueChartOption" :autoresize="true"></v-chart>
           </div>
         </n-statistic>
@@ -13,11 +13,18 @@
       <!-- 电影时长分布 -->
       <n-gi :span="1">
         <n-statistic label="电影时长分布">
-          <div class="h-50">
+          <div class="h-70">
             <v-chart class="w-full h-full" :option="runtimeChartOption" :autoresize="true"></v-chart>
           </div>
         </n-statistic>
       </n-gi>
+
+      <n-gi :span="1">
+        <n-statistic label="电影类型统计">
+          <genre-stats-chart/>
+        </n-statistic>
+      </n-gi>
+
     </n-grid>
   </n-card>
 </template>
@@ -33,6 +40,7 @@ import VChart from 'vue-echarts';
 import {visualizationApi} from '@/lib/api';
 import {useTheme} from '@/composables/useTheme';
 import {getChartTheme} from '@/lib/theme';
+import GenreStatsChart from "@/components/GenreStatsChart.vue";
 
 // 注册 ECharts 组件
 use([
@@ -275,9 +283,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.h-50 {
-  height: 12.5rem;
-}
 .w-full {
   width: 100%;
 }

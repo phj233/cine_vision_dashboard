@@ -61,6 +61,7 @@ import {
   NButton,
   NCard,
   NDataTable,
+  NEllipsis,
   NImage,
   NInput,
   NRate,
@@ -71,6 +72,7 @@ import {
   PaginationProps
 } from 'naive-ui';
 import {Icon} from '@iconify/vue';
+import {Movie} from "@/types.ts";
 
 
 // 定义Props
@@ -273,28 +275,12 @@ watch(() => props.movies, (newMovies) => {
   }
 }, {immediate: true});
 
-// 定义电影数据类型
-interface Movie {
-  id: string | number;
-  title: string;
-  original_title?: string;
-  poster_path?: string;
-  genres: string[] | string;
-  release_date?: string;
-  vote_average?: number;
-  runtime?: number;
-  production_countries: string[] | string;
-  revenue?: number;
-  imdb_id?: string;
-  tmdb_id?: string;
-}
-
 // 表格列定义
-const columns = computed<DataTableColumns<Movie>>(() => [
+const columns = computed((): DataTableColumns<Movie> => [
   {
     title: '海报',
     key: 'poster_path',
-    width: 90,
+    width: 100,
     render(row) {
       const getPosterUrl = (path?: string | null) => {
         if (!path) return 'https://via.placeholder.com/60x90?text=无海报';
@@ -304,9 +290,7 @@ const columns = computed<DataTableColumns<Movie>>(() => [
       };
       return h(NImage, {
         src: getPosterUrl(row.poster_path),
-        width: 60,
-        height: 90,
-        objectFit: 'cover',
+        width: 80, height: 140, objectFit: 'cover',
         fallbackSrc: 'https://via.placeholder.com/60x90?text=无海报',
         style: 'border-radius: 4px;'
       });
@@ -315,32 +299,40 @@ const columns = computed<DataTableColumns<Movie>>(() => [
   {
     title: '片名',
     key: 'title',
-    width: 200,
+    width: 100,
     render(row) {
-      return h(NSpace, { vertical: true, size: 0 }, {
-        default: () => [
-          h(NText, { strong: true }, { default: () => row.title || '无标题' }),
-          row.original_title && row.original_title !== row.title
-            ? h(NText, { depth: 3, size: 'small' }, { default: () => row.original_title })
-            : null
-        ]
-      });
+      const mainTitleNode = h(
+        NEllipsis, {}, { default: () => row.title ?? '无标题' }
+      );
+
+      const children = [mainTitleNode];
+
+      if (row.original_title && row.original_title !== row.title) {
+        children.push(
+          h(NText, { depth: 3, size: 'small', style: { marginTop: '2px', display: 'block' } },
+            { default: () => row.original_title }
+          )
+        );
+      }
+      if (children.length > 1) {
+        return h(NSpace, { vertical: true, size: 0, wrapItem: false }, { default: () => children });
+      }
+      return mainTitleNode;
     }
   },
   {
     title: '类型',
     key: 'genres',
-    width: 220,
+    width: 180,
     render(row) {
-      const genres = Array.isArray(row.genres)
-        ? row.genres
-        : typeof row.genres === 'string'
-          ? row.genres.split(', ')
-          : [];
-
-      return h(NSpace, { size: 'small', wrap: true }, {
-        default: () => genres.map((genre: string) =>
-          h(NTag, { size: 'small', type: 'info' }, { default: () => genre })
+      const validGenres = Array.isArray(row.genres) ? row.genres.filter(g => g && typeof g === 'string') : [];
+      if (validGenres.length === 0) {
+        return h(NText, { depth: 3 }, { default: () => '无类型' });
+      }
+      // 移除了 NMarquee，NSpace 添加 wrap: true
+      return h(NSpace, { itemStyle: { marginRight: '4px', marginBottom: '4px' }, wrap: true, size: 'small' }, {
+        default: () => validGenres.map((genre: string) =>
+          h(NTag, { size: 'small', type: 'info', round: true }, { default: () => genre })
         )
       });
     }
@@ -354,11 +346,9 @@ const columns = computed<DataTableColumns<Movie>>(() => [
     render(row) {
       if (!row.release_date) return '未知';
       try {
-        const date = new Date(row.release_date);
+        const date = new Date(String(row.release_date));
         if (isNaN(date.getTime())) return '未知';
-        return date.getFullYear() + '-' +
-          (date.getMonth() + 1).toString().padStart(2, '0') + '-' +
-          date.getDate().toString().padStart(2, '0');
+        return date.toLocaleDateString();
       } catch (e) {
         return '未知';
       }
@@ -369,22 +359,20 @@ const columns = computed<DataTableColumns<Movie>>(() => [
     key: 'vote_average',
     width: 160,
     sorter(rowA, rowB) {
-      return Number(rowA.vote_average || 0) - Number(rowB.vote_average || 0);
+      return (rowA.vote_average ?? 0) - (rowB.vote_average ?? 0);
     },
     render(row) {
-      const rating = parseFloat(String(row.vote_average || '0'));
-      return h(NSpace, { align: 'center' }, {
-        default: () => [
-          h(NRate, {
-            size: 'small',
-            allowHalf: true,
-            readonly: true,
-            value: rating / 2,
-            color: '#FFAC33'
-          }),
-          h(NText, { depth: 2 }, { default: () => rating.toFixed(1) })
-        ]
-      });
+      const rating = row.vote_average ?? 0;
+      return h(
+        NSpace,
+        { align: 'center', wrap: false, size: 'small' },
+        {
+          default: () => [
+            h(NRate, { size: 'small', allowHalf: true, readonly: true, value: rating / 2, color: '#FFAC33' }),
+            h(NText, { depth: 2 }, { default: () => rating.toFixed(1) })
+          ]
+        }
+      );
     }
   },
   {
@@ -392,7 +380,7 @@ const columns = computed<DataTableColumns<Movie>>(() => [
     key: 'runtime',
     width: 80,
     render(row) {
-      const runtime = parseInt(String(row.runtime || '0'));
+      const runtime = Number(row.runtime ?? 0);
       return runtime ? `${runtime}分钟` : '未知';
     }
   },
@@ -401,17 +389,19 @@ const columns = computed<DataTableColumns<Movie>>(() => [
     key: 'production_countries',
     width: 120,
     render(row) {
-      const countries = Array.isArray(row.production_countries)
-        ? row.production_countries
-        : typeof row.production_countries === 'string'
-          ? row.production_countries.split(', ')
-          : [];
+      const countries = row.production_countries;
+      if (!countries || (Array.isArray(countries) && countries.length === 0) || (typeof countries === 'string' && !countries.trim())) {
+        return h(NText, { depth: 3 }, { default: () => '未知' });
+      }
+      const countryList = (Array.isArray(countries) ? countries : String(countries).split(/[,，]/).map(c => c.trim())).filter(Boolean);
 
-      if (countries.length === 0) return '未知';
-
-      return h(NSpace, { size: 'small', wrap: true }, {
-        default: () => countries.map((country: string) =>
-          h(NTag, { size: 'small', type: 'success' }, { default: () => country })
+      if (countryList.length === 0) {
+        return h(NText, { depth: 3 }, { default: () => '未知' });
+      }
+      // 移除了 NMarquee，NSpace 添加 wrap: true
+      return h(NSpace, { itemStyle: { marginRight: '4px', marginBottom: '4px' }, wrap: true, size: 'small' }, {
+        default: () => countryList.map((country: string) =>
+          h(NTag, { size: 'small', type: 'info', round: true }, { default: () => country })
         )
       });
     }
@@ -421,10 +411,10 @@ const columns = computed<DataTableColumns<Movie>>(() => [
     key: 'revenue',
     width: 120,
     sorter(rowA, rowB) {
-      return Number(rowA.revenue || 0) - Number(rowB.revenue || 0);
+      return (rowA.revenue ?? 0) - (rowB.revenue ?? 0);
     },
     render(row) {
-      const revenue = parseInt(String(row.revenue || '0'));
+      const revenue = row.revenue ?? 0;
       if (!revenue) return '未知';
       if (revenue >= 1000000000) return `${(revenue / 1000000000).toFixed(2)}B`;
       if (revenue >= 1000000) return `${(revenue / 1000000).toFixed(1)}M`;
@@ -437,40 +427,26 @@ const columns = computed<DataTableColumns<Movie>>(() => [
     key: 'links',
     width: 100,
     render(row) {
-      return h(NSpace, { justify: 'center', align: 'center' }, {
-        default: () => [
-          row.imdb_id
-            ? h(NButton, {
-                quaternary: true,
-                circle: true,
-                size: 'small',
-                onClick: () => {
-                  const imdbId = String(row.imdb_id).startsWith('tt') ? row.imdb_id : `tt${row.imdb_id}`;
-                  window.open(`https://www.imdb.com/title/${imdbId}`, '_blank');
-                }
-              }, {
-                default: () => h(Icon, { icon: 'simple-icons:imdb', style: 'font-size: 20px; color: #F5C518;' })
-              })
-            : null,
-          row.tmdb_id
-            ? h(NButton, {
-                quaternary: true,
-                circle: true,
-                size: 'small',
-                onClick: () => {
-                  window.open(`https://www.themoviedb.org/movie/${row.tmdb_id}`, '_blank');
-                }
-              }, {
-                default: () => h(Icon, { icon: 'simple-icons:themoviedatabase', style: 'font-size: 20px; color: #01B4E4;' })
-              })
-            : null
-        ]
-      });
+      const children:any[] = [];
+      if (row.imdb_id) {
+        children.push(h(NButton, {
+          quaternary: true, circle: true, size: 'small', tag: 'a',
+          href: `https://www.imdb.com/title/${String(row.imdb_id).startsWith('tt') ? row.imdb_id : `tt${row.imdb_id}`}`,
+          target: '_blank', rel: 'noopener noreferrer'
+        }, { default: () => h(Icon, { icon: 'simple-icons:imdb', style: 'font-size: 20px; color: #F5C518;' }) }));
+      }
+      if (row.tmdb_id) {
+        children.push(h(NButton, {
+          quaternary: true, circle: true, size: 'small', tag: 'a',
+          href: `https://www.themoviedb.org/movie/${row.tmdb_id}`,
+          target: '_blank', rel: 'noopener noreferrer'
+        }, { default: () => h(Icon, { icon: 'simple-icons:themoviedatabase', style: 'font-size: 20px; color: #01B4E4;' }) }));
+      }
+      if (children.length === 0) {
+        return h(NText, { depth: 3 }, { default: () => '无链接' });
+      }
+      return h(NSpace, { justify: 'center', align: 'center' }, { default: () => children });
     }
   }
 ]);
 </script>
-
-<style scoped>
-
-</style>

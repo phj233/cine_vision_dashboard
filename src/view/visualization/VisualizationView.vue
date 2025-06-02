@@ -651,8 +651,8 @@ const companiesChartOption = computed(() => {
     yAxis: {
       type: 'value',
       name: companyMetric.value === 'movie_count' ? '电影数量' :
-            companyMetric.value === 'avg_rating' ? '平均评分' :
-            companyMetric.value === 'total_revenue' ? '总票房' : '平均票房'
+        companyMetric.value === 'avg_rating' ? '平均评分' :
+          companyMetric.value === 'total_revenue' ? '总票房' : '平均票房'
     },
     series: [
       {
@@ -665,7 +665,7 @@ const companiesChartOption = computed(() => {
         itemStyle: {
           color: function(params: any) {
             const colors = ['#ff7979', '#ffbe76', '#badc58', '#54a0ff', '#5f27cd',
-                           '#ff6b81', '#7bed9f', '#70a1ff', '#a4b0be', '#ff9ff3'];
+              '#ff6b81', '#7bed9f', '#70a1ff', '#a4b0be', '#ff9ff3'];
             return colors[params.dataIndex % colors.length];
           }
         }
