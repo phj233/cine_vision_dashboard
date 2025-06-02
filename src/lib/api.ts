@@ -333,3 +333,37 @@ export const visualizationApi = {
         }
     }
 };
+
+/**
+ *  导入 API
+ *  @module importApi
+ */
+export const importApi = {
+    /**
+     * 上传 CSV 文件
+     * @param file
+     * @param onUploadProgress
+     */
+    async uploadCsvFile(
+        file: File,
+        onUploadProgress?: (progressEvent: any) => void // Axios 的进度事件类型
+    ) {
+        const formData = new FormData();
+        // 后端期望的字段名是 'file'
+        formData.append('file', file, file.name);
+
+        try {
+            const response = await apiClient.post('/api/v1/import', formData, {
+                headers: {
+                    'Content-Type': undefined
+                },
+                onUploadProgress: onUploadProgress,
+                timeout: 300000,
+            });
+            return response.data;
+        } catch (error) {
+            // 使用您已有的统一错误处理函数
+            return handleApiError(error);
+        }
+    },
+};
