@@ -14,6 +14,7 @@ declare module 'vue' {
     CardItem: typeof import('./src/components/ui/card-3d/CardItem.vue')['default']
     ChartSection: typeof import('./src/components/ChartSection.vue')['default']
     DirectorAnalysisChart: typeof import('./src/components/DirectorAnalysisChart.vue')['default']
+    GenreStatsChart: typeof import('./src/components/GenreStatsChart.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
     IInput: typeof import('./src/components/ui/input/IInput.vue')['default']
     LanguageDistributionChart: typeof import('./src/components/LanguageDistributionChart.vue')['default']

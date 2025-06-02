@@ -1,21 +1,23 @@
 export interface Movie {
-    id: number;
-    title: string;
-    original_title: string;
-    release_date: string;
-    vote_average: number;
-    vote_count?: number;
-    revenue: number;
-    runtime: number;
-    overview: string;
-    tagline: string;
-    genres: string;
-    cast: string;
-    directors: string;
-    production_companies: string;
-    production_countries: string;
-    poster_path: string;
-    budget: number;
+    id: string | number;                      // ID 可能是数字也可能是字符串 (例如 TMDB ID)
+    title: string;                            // 标题通常是必需的
+    original_title?: string | null;           // 原始标题可能不存在或与主标题相同
+    release_date?: string | number | null;    // 上映日期可能未知
+    vote_average?: number | null;             // 平均评分可能为0或未知
+    vote_count?: number | null;               // 评分数量可能为0或未知
+    revenue?: number | null;                  // 票房可能为0或未知
+    runtime?: number | null;                  // 时长可能未知
+    overview?: string | null;                 // 概述可能为空
+    tagline?: string | null;                  // 宣传语可能为空
+    genres?: string[] | string | null;                 // 类型列表
+    cast?: string[] | string | null;                   // 主要演员列表 (仅名字)
+    directors?: string[] | string | null;              // 导演列表 (仅名字)
+    production_companies?: string[] | string | null;   // 制作公司列表 (仅名字)
+    production_countries?: string[] | string | null;   // 制片国家/地区列表 (仅名字)
+    poster_path?: string | null;              //海报路径可能为空
+    budget?: number | null;                   // 预算可能为0或未知
+    imdb_id?: string | null;                  // 已是可选且可空，保持
+    tmdb_id?: string | number | null;         // 已是可选且可空，保持
 }
 
 export interface Stats {
@@ -73,4 +75,4 @@ export interface ActorNetworkData {
     nodes: ActorNode[];
     links: ActorLink[];
     categories: { name: string }[];
-} 
+}
