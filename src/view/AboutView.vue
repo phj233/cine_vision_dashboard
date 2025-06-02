@@ -188,9 +188,6 @@ const openLicense = () => {
 </template>
 
 <style scoped>
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
 
 @keyframes float {
   0% {
